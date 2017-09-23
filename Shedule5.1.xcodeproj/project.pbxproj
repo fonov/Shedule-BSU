@@ -398,6 +398,7 @@
 					35242F421C6A558A005D135A = {
 						CreatedOnToolsVersion = 7.2.1;
 						DevelopmentTeam = CJ3K6UF4KJ;
+						LastSwiftMigration = 0820;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -416,6 +417,7 @@
 					B6BAFA5B1CC7C0B1004FDE80 = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = CJ3K6UF4KJ;
+						LastSwiftMigration = 0820;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -661,6 +663,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "mounlion.corp.Shedule4-0";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "d5dd15e1-a8b4-4580-9ce5-d47689f5d78b";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -683,6 +686,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "mounlion.corp.Shedule4-0";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "d5dd15e1-a8b4-4580-9ce5-d47689f5d78b";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -704,6 +708,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "mounlion.corp.Shedule4-0.widjetshedule";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -724,6 +729,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "mounlion.corp.Shedule4-0.widjetshedule";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

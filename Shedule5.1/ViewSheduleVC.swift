@@ -7,6 +7,30 @@
 //
 
 import UIKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -19,8 +43,8 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     @IBOutlet weak var loadlabel: UILabel!
     
     var hidingNavBarManager: HidingNavigationBarManager?
-    let nc = NSNotificationCenter.defaultCenter()
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
     var SFjson: NSDictionary!
     var tableupdata: Bool = false
     var refreshControl:UIRefreshControl!
@@ -28,7 +52,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     var tablealerttext: String = ""
     var upflag: Bool = false
     var openview: Bool = false
-    var chromtimer: NSTimer!
+    var chromtimer: Timer!
     var flagads: Bool!
     var counads: Int!
     
@@ -37,9 +61,9 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         initautohidetabbarandnavcontroller()
         refreshinit()
         initswipetableview()
-        nc.addObserver(self, selector: #selector(ViewSheduleVC.updateactualsection), name: "funcupdateactualsection", object: nil)
-        nc.addObserver(self, selector: #selector(ViewSheduleVC.chromtimerstart), name: "funcchromtimerstart", object: nil)
-        nc.addObserver(self, selector: #selector(ViewSheduleVC.chromtimerstop), name: "funcchromtimerstop", object: nil)
+        nc.addObserver(self, selector: #selector(ViewSheduleVC.updateactualsection), name: NSNotification.Name(rawValue: "funcupdateactualsection"), object: nil)
+        nc.addObserver(self, selector: #selector(ViewSheduleVC.chromtimerstart), name: NSNotification.Name(rawValue: "funcchromtimerstart"), object: nil)
+        nc.addObserver(self, selector: #selector(ViewSheduleVC.chromtimerstop), name: NSNotification.Name(rawValue: "funcchromtimerstop"), object: nil)
     }
     
     override func didReceiveMemoryWarning() {
@@ -47,17 +71,17 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         // Dispose of any resources that can be recreated.
     }
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return false
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         hidingNavBarManager?.viewWillAppear(animated)
         inittimerstart()
         sheduleviewsheduleinit(false)
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         hidingNavBarManager?.viewWillDisappear(animated)
         inittimerfinish()
     }
@@ -68,31 +92,31 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
 
     
-    func sheduleviewsheduleinit(eswipe: Bool){
+    func sheduleviewsheduleinit(_ eswipe: Bool){
         // reset all setting
         tableViewinit()
         // update title
         sheduleviewtitleinit()
         
-        if let update = defaults.objectForKey("SheduleSettingupdate"){
+        if let update = defaults.object(forKey: "SheduleSettingupdate"){
             
-            if defaults.objectForKey("SheduleSettingSourseShedule") == nil{
+            if defaults.object(forKey: "SheduleSettingSourseShedule") == nil{
                 infopanel("Для отображения расписания его нужно настроить. Установите тип расписания.", img: "shedule", hide: false)
                 return
             }
-            if defaults.objectForKey("SheduleSettingtime") == nil{
+            if defaults.object(forKey: "SheduleSettingtime") == nil{
                 infopanel("Для отображения расписания его нужно настроить. Установите время расписания.", img: "shedule", hide: false)
                 return
             }
-            if defaults.objectForKey("SheduleSettingtime") as! Int == 3 && (defaults.objectForKey("SheduleSettingCustomdatefist") == nil || defaults.objectForKey("SheduleSettingCustomdatelast") == nil){
+            if defaults.object(forKey: "SheduleSettingtime") as! Int == 3 && (defaults.object(forKey: "SheduleSettingCustomdatefist") == nil || defaults.object(forKey: "SheduleSettingCustomdatelast") == nil){
                 infopanel("Для отображения расписания его нужно настроить. Установите своё время расписания.", img: "shedule", hide: false)
                 return
             }
-            if defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 0 && defaults.objectForKey("SheduleSettingSourseGroupID") == nil{
+            if defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 0 && defaults.object(forKey: "SheduleSettingSourseGroupID") == nil{
                 infopanel("Для отображения расписания его нужно настроить. Установите номер группы.", img: "shedule", hide: false)
                 return
             }
-            if defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 1 && defaults.objectForKey("SheduleSettingSourseTeachID") == nil{
+            if defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 1 && defaults.object(forKey: "SheduleSettingSourseTeachID") == nil{
                 infopanel("Для отображения расписания его нужно настроить. Выберите преподавателя.", img: "shedule", hide: false)
                 return
             }
@@ -102,38 +126,41 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             if (update as! Bool)||(!checkactualweek()){
                 // on load indicator
                 self.loadindicator(false, hide: false)
-                let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-                dispatch_async(dispatch_get_global_queue(priority, 0)) {
+                let priority = DispatchQueue.GlobalQueuePriority.default
+                DispatchQueue.global(priority: priority).async {
                 
                     var stingpost: String!
-                    if self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 0{
-                        stingpost = "group=\(self.defaults.objectForKey("SheduleSettingSourseGroupID") as! String)"
+                    if self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 0{
+                        stingpost = "group=\(self.defaults.object(forKey: "SheduleSettingSourseGroupID") as! String)"
                     }
-                    if self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 1{
-                        let teachid: [String] = self.defaults.objectForKey("SheduleSettingSourseTeachID") as! Array<String>
+                    if self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 1{
+                         let teachid: [String] = self.defaults.object(forKey: "SheduleSettingSourseTeachID") as! Array<String>
                         stingpost = "teach=\(teachid[0])"
                     }
-                    if self.defaults.objectForKey("SheduleSettingtime") as! Int == 0 || self.defaults.objectForKey("SheduleSettingtime") as! Int == 1 ||  self.defaults.objectForKey("SheduleSettingtime") as! Int == 2 {
-                        var week: Int = self.defaults.objectForKey("SheduleSettingtime") as! Int
+                    if self.defaults.object(forKey: "SheduleSettingtime") as! Int == 0 || self.defaults.object(forKey: "SheduleSettingtime") as! Int == 1 ||  self.defaults.object(forKey: "SheduleSettingtime") as! Int == 2 {
+                        var week: Int = self.defaults.object(forKey: "SheduleSettingtime") as! Int
                         week = week+1
-                        stingpost = "\(stingpost)&week=\(week)"
+                        stingpost = stingpost+"&week=\(week)"
                     }
-                    if self.defaults.objectForKey("SheduleSettingtime") as! Int == 3{
-                        let fistdate: [String] = self.defaults.objectForKey("SheduleSettingCustomdatefist") as! [String]
-                        let lastdate: [String] = self.defaults.objectForKey("SheduleSettingCustomdatelast") as! [String]
-                        stingpost = "\(stingpost)&week=\(fistdate[0])\(lastdate[0])"
+                    if self.defaults.object(forKey: "SheduleSettingtime") as! Int == 3{
+                        let fistdate: [String] = self.defaults.object(forKey: "SheduleSettingCustomdatefist") as! [String]
+                        let lastdate: [String] = self.defaults.object(forKey: "SheduleSettingCustomdatelast") as! [String]
+                        stingpost = stingpost+"&week=\(fistdate[0])\(lastdate[0])"
                     }
-                    
-                    stingpost = "\(stingpost)&model=\(UIDevice.currentDevice().modelName)&version=\(UIDevice.currentDevice().systemVersion)"
-//                    stingpost = "\(stingpost)&debag_mode=on"
-                    stingpost = self.nocashe(stingpost)
                     print(stingpost)
                     
+                    stingpost = stingpost+"&model=\(UIDevice.current.modelName)&version=\(UIDevice.current.systemVersion)"
+//                    stingpost = stingpost+"&debag_mode=on"
+                    stingpost = self.nocashe(stingpost)
                     
+                    
+                    print(stingpost)
+                    
+                
                     let SFCpostjson = SFpostjson(in_post: stingpost, in_url: "http://lab.lionrepair.ru/uapp/api.php")
                     self.SFjson = SFCpostjson.json
                     
-                    dispatch_async(dispatch_get_main_queue()) {
+                    DispatchQueue.main.async {
                     
                         let codejson: Int = self.SFjson["code"] as! Int
                         switch codejson{
@@ -160,10 +187,10 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                 }
 
             }else{
-                let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-                dispatch_async(dispatch_get_global_queue(priority, 0)) {
+                let priority = DispatchQueue.GlobalQueuePriority.default
+                DispatchQueue.global(priority: priority).async {
                     self.SFjson = self.sheduledatainit()
-                    dispatch_async(dispatch_get_main_queue()) {
+                    DispatchQueue.main.async {
                         self.tableViewShow()
                         self.autoscrolltable()
                     }
@@ -174,17 +201,17 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    func infopanel(label: String, img: String, hide: Bool){
+    func infopanel(_ label: String, img: String, hide: Bool){
         infoimg.image = UIImage(named: img)
         infolabel.text = label
-        infolabel.textColor = UIColor.blackColor()
-        infoimg.hidden = hide
-        infolabel.hidden = hide
+        infolabel.textColor = UIColor.black
+        infoimg.isHidden = hide
+        infolabel.isHidden = hide
         loadind.stopAnimating()
-        loadlabel.hidden = true
+        loadlabel.isHidden = true
     }
     
-    func jsoncode00(eswith: Bool){
+    func jsoncode00(_ eswith: Bool){
         if eswith{
             self.tableView.alpha = 1
         }
@@ -195,7 +222,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         newindicatorreload(text)
     }
     
-    func jsoncode01(eswith: Bool){
+    func jsoncode01(_ eswith: Bool){
         if eswith{
             self.tableView.alpha = 1
         }
@@ -206,7 +233,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         newindicatorreload(text)
     }
     
-    func jsoncode02(eswith: Bool){
+    func jsoncode02(_ eswith: Bool){
         if eswith{
             self.tableView.alpha = 1
         }
@@ -217,21 +244,21 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         newindicatorreload(text)
     }
     
-    func jsoncode03(eswith: Bool){
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+    func jsoncode03(_ eswith: Bool){
+        let priority = DispatchQueue.GlobalQueuePriority.default
+        DispatchQueue.global(priority: priority).async {
             self.mainshedulesave()
             self.setactualweek()
             //  set notification
             self.localnotification()
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 self.loadindicator(true, hide: true)
                 self.infopanel("", img: "cross31", hide: true)
                 self.tableViewShow()
                 self.mainfeedbackappstore()
                 self.autoscrolltable()
                 if eswith{
-                    UIView.animateWithDuration(1.0, animations: {
+                    UIView.animate(withDuration: 1.0, animations: {
                         self.tableView.alpha = 1
                         }, completion: { _ in
                     })
@@ -240,17 +267,17 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
 
-    func jsoncode04(eswith: Bool){
+    func jsoncode04(_ eswith: Bool){
         if eswith{
             self.tableView.alpha = 1
         }
         self.loadindicator(true, hide: true)
         let text = String((self.SFjson["data"] as! NSDictionary)["info"] as! String)
-        infopanel(text, img: "cross31", hide: false)
+        infopanel(text!, img: "cross31", hide: false)
         tableViewhide()
     }
     
-    func jsoncode05(eswith: Bool){
+    func jsoncode05(_ eswith: Bool){
         if eswith{
             self.tableView.alpha = 1
         }
@@ -262,7 +289,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func sheduledatainit()->NSDictionary{
-        return defaults.objectForKey("sheduledata") as! NSDictionary
+        return defaults.object(forKey: "sheduledata") as! NSDictionary
     }
     
     func sheduleviewtitleinit(){
@@ -273,16 +300,16 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         subtext = ""
         doublelabel = false
         
-        if self.defaults.objectForKey("SheduleSettingSourseShedule") != nil && self.defaults.objectForKey("SheduleSettingSourseGroupID") != nil && self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 0{
-            text = "Группа \(self.defaults.objectForKey("SheduleSettingSourseGroupID") as! String)"
+        if self.defaults.object(forKey: "SheduleSettingSourseShedule") != nil && self.defaults.object(forKey: "SheduleSettingSourseGroupID") != nil && self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 0{
+            text = "Группа \(self.defaults.object(forKey: "SheduleSettingSourseGroupID") as! String)"
         }
-        if self.defaults.objectForKey("SheduleSettingSourseShedule") != nil && self.defaults.objectForKey("SheduleSettingSourseTeachID") != nil && self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 1{
-            let teachid: [String] = self.defaults.objectForKey("SheduleSettingSourseTeachID") as! Array<String>
+        if self.defaults.object(forKey: "SheduleSettingSourseShedule") != nil && self.defaults.object(forKey: "SheduleSettingSourseTeachID") != nil && self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 1{
+            let teachid: [String] = self.defaults.object(forKey: "SheduleSettingSourseTeachID") as! Array<String>
             text = teachid[1]
         }
         
-        if self.defaults.objectForKey("SheduleSettingtime") != nil{
-            switch self.defaults.objectForKey("SheduleSettingtime") as! Int{
+        if self.defaults.object(forKey: "SheduleSettingtime") != nil{
+            switch self.defaults.object(forKey: "SheduleSettingtime") as! Int{
             case 0:
                 doublelabel = true
                 subtext = "прошлая неделя"
@@ -296,9 +323,9 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                 subtext = "следующая неделя"
                 break
             case 3:
-                if self.defaults.objectForKey("SheduleSettingCustomdatefist") != nil && self.defaults.objectForKey("SheduleSettingCustomdatelast") != nil{
-                    let fistdate: [String] = self.defaults.objectForKey("SheduleSettingCustomdatefist") as! [String]
-                    let lastdate: [String] = self.defaults.objectForKey("SheduleSettingCustomdatelast") as! [String]
+                if self.defaults.object(forKey: "SheduleSettingCustomdatefist") != nil && self.defaults.object(forKey: "SheduleSettingCustomdatelast") != nil{
+                    let fistdate: [String] = self.defaults.object(forKey: "SheduleSettingCustomdatefist") as! [String]
+                    let lastdate: [String] = self.defaults.object(forKey: "SheduleSettingCustomdatelast") as! [String]
                     doublelabel = true
                     subtext = "\(fistdate[1])-\(lastdate[1])"
                 }
@@ -312,72 +339,79 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     
-    func addTitleAndSubtitleToNavigationBar (title: String, subtitle: String, num: Int) {
-        let label = UILabel(frame: CGRectMake(10.0, 0.0, 50.0, 40.0))
+    func addTitleAndSubtitleToNavigationBar (_ title: String, subtitle: String, num: Int) {
+        let label = UILabel(frame: CGRect(x: 10.0, y: 0.0, width: 50.0, height: 40.0))
         if num == 1{
-            label.font = UIFont.boldSystemFontOfSize(18.0)
+            label.font = UIFont.boldSystemFont(ofSize: 18.0)
         }else{
-            label.font = UIFont.boldSystemFontOfSize(15.0)
+            label.font = UIFont.boldSystemFont(ofSize: 15.0)
         }
         label.numberOfLines = num
         label.text = "\(title)\n\(subtitle)"
 //        label.textColor = UIColor.whiteColor()
-        label.textColor = UIColor.blackColor()
-        label.backgroundColor = UIColor.clearColor()
+        label.textColor = UIColor.black
+        label.backgroundColor = UIColor.clear
         label.sizeToFit()
-        label.textAlignment = NSTextAlignment.Center
+        label.textAlignment = NSTextAlignment.center
         self.navigationItem.titleView = label
     }
 
-    func loadindicator(flag: Bool, hide: Bool){
+    func loadindicator(_ flag: Bool, hide: Bool){
         if flag && hide{
             SwiftSpinner.hide()
         }else{
             SwiftSpinner.show("Загрузка расписания...")
         }
-        infoimg.hidden = true
-        infolabel.hidden = true
+        infoimg.isHidden = true
+        infolabel.isHidden = true
     }
     func tableViewinit(){
         upflag = false
-        tableView.separatorStyle = .None
-        tableView.hidden = true
+        tableView.separatorStyle = .none
+        tableView.isHidden = true
         tableupdata = false
         tablealert = false
         flagads = false
     }
     
     func tableViewShow(){
-        tableView.hidden = false
+        tableView.isHidden = false
         tableupdata = true
         tablealert = false
         tableView.reloadData()
     }
     func tableViewhide(){
-        tableView.hidden = true
+        tableView.isHidden = true
         tableupdata = false
         tablealert = false
         tableView.reloadData()
     }
     
-    func tableViewalert(text: String){
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+    func tableViewalert(_ text: String){
+        let priority = DispatchQueue.GlobalQueuePriority.default
+        DispatchQueue.global(priority: priority).async {
             // do some task
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 self.tablealerttext = text
                 self.tableupdata = false
                 self.tablealert = true
-                self.tableView.hidden = false
+                self.tableView.isHidden = false
                 self.tableView.reloadData()
-                self.tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 0), atScrollPosition: .Top, animated: true)
+                self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
             }
         }
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        var numberOfSections: Int
+        if (SFjson != nil){
+            numberOfSections = ((SFjson["data"] as! [String:AnyObject])["data"]?.count)!
+        } else {
+            numberOfSections = 1
+        }
         if tableupdata{
-            return SFjson["data"]!["data"]!!.count}
+            return numberOfSections
+        }
         else if tablealert{
             return 1
         }else{
@@ -385,9 +419,12 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableupdata{
-        var num: Int = SFjson["data"]!["data"]!![section][1].count
+        
+            let date: [[Any]] = ((SFjson["data"] as? [String:Any])!["data"] as? [[Any]])!
+            var num: Int = (date[section][1] as AnyObject).count
+            
         num = num+1
         return num
         }
@@ -398,52 +435,52 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
     
-    func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableupdata{
         if indexPath.row == 0{
-            let cell = tableView.dequeueReusableCellWithIdentifier("tschead", forIndexPath: indexPath) as! tschead
-            cell.tlabel.text = ftschead(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[0]))
-            cell.selectionStyle = .None
+            let cell = tableView.dequeueReusableCell(withIdentifier: "tschead", for: indexPath) as! tschead
+            cell.tlabel.text = ftschead(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[0]))
+            cell.selectionStyle = .none
             return cell
         }else{
                 let crow = indexPath.row - 1
-                let cell = tableView.dequeueReusableCellWithIdentifier("tscbody", forIndexPath: indexPath) as! tscbody
-                cell.ltimesh.text = ftshbodytime(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 0)[0]
-                cell.ltimesi.text = ftshbodytime(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 0)[1]
-                cell.lnumber.text = String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[0])
-                cell.ltimefh.text = ftshbodytime(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 1)[0]
-                cell.ltimefi.text = ftshbodytime(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 1)[1]
-                cell.vsheduleindicator.backgroundColor = ftcbodyindcolor(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[2]))
-                cell.lsubsubject.text = String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[2])
-                cell.lsabject.text = String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[3])
-                if self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 0{
-                    cell.lsubteacher.text = String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[4])
+                let cell = tableView.dequeueReusableCell(withIdentifier: "tscbody", for: indexPath) as! tscbody
+                cell.ltimesh.text = ftshbodytime(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 0)[0]
+                cell.ltimesi.text = ftshbodytime(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 0)[1]
+                cell.lnumber.text = String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[0])
+                cell.ltimefh.text = ftshbodytime(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 1)[0]
+                cell.ltimefi.text = ftshbodytime(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[1]), num: 1)[1]
+                cell.vsheduleindicator.backgroundColor = ftcbodyindcolor(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[2]))
+                cell.lsubsubject.text = String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[2])
+                cell.lsabject.text = String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[3])
+                if self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 0{
+                    cell.lsubteacher.text = String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[4])
                 }
-                if self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int == 1{
+                if self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int == 1{
                     cell.lsubteacher.text = "группа"
                 }
-                cell.lteacher.text = String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[5-(self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int)])
-                cell.laud.text = ftcbodyaud(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[6-(self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int)]))[0] as? String
-                if !(ftcbodyaud(String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[6-(self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int)]))[1] as! Bool){
+                cell.lteacher.text = String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[5-(self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int)])
+                cell.laud.text = ftcbodyaud(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[6-(self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int)]))[0] as? String
+                if !(ftcbodyaud(String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[6-(self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int)]))[1] as! Bool){
                     cell.laud.textColor = UIColor(red: 105/255, green: 105/255, blue: 105/255, alpha: 1)
                 }else{
-                    cell.laud.textColor = UIColor.blackColor()
+                    cell.laud.textColor = UIColor.black
                 }
-                cell.selectionStyle = .None
+                cell.selectionStyle = .none
                 return cell
             }
             }else if tablealert{
-            let cell = tableView.dequeueReusableCellWithIdentifier("tscalert", forIndexPath: indexPath) as! tscalert
+            let cell = tableView.dequeueReusableCell(withIdentifier: "tscalert", for: indexPath) as! tscalert
             cell.label.text = tablealerttext
-            cell.selectionStyle = .None
+            cell.selectionStyle = .none
             return cell
         }else{
             let cell = UITableViewCell()
@@ -452,76 +489,87 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     
-    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
 
-        if (cell.respondsToSelector(Selector("tintColor"))){
+        if (cell.responds(to: #selector(getter: UIView.tintColor))){
             if (tableView == self.tableView) {
                 let cornerRadius : CGFloat = 6.0
-                cell.backgroundColor = UIColor.clearColor()
+                cell.backgroundColor = UIColor.clear
                 let layer: CAShapeLayer = CAShapeLayer()
-                let pathRef:CGMutablePathRef = CGPathCreateMutable()
-                let bounds: CGRect = CGRectInset(cell.bounds, 15.0, 0)
+                let pathRef:CGMutablePath = CGMutablePath()
+                let bounds: CGRect = cell.bounds.insetBy(dx: 15.0, dy: 0)
                 var addLine: Bool = false
                 
-                if (indexPath.row == 0 && indexPath.row == tableView.numberOfRowsInSection(indexPath.section)-1) {
-                    CGPathAddRoundedRect(pathRef, nil, bounds, cornerRadius, cornerRadius)
+                if (indexPath.row == 0 && indexPath.row == tableView.numberOfRows(inSection: indexPath.section)-1) {
+                    pathRef.__addRoundedRect(transform: nil, rect: bounds, cornerWidth: cornerRadius, cornerHeight: cornerRadius)
                 } else if (indexPath.row == 0) {
-                    CGPathMoveToPoint(pathRef, nil, CGRectGetMinX(bounds), CGRectGetMaxY(bounds))
-                    CGPathAddArcToPoint(pathRef, nil, CGRectGetMinX(bounds), CGRectGetMinY(bounds), CGRectGetMidX(bounds), CGRectGetMinY(bounds), cornerRadius)
-                    CGPathAddArcToPoint(pathRef, nil, CGRectGetMaxX(bounds), CGRectGetMinY(bounds), CGRectGetMaxX(bounds), CGRectGetMidY(bounds), cornerRadius)
-                    CGPathAddLineToPoint(pathRef, nil, CGRectGetMaxX(bounds), CGRectGetMaxY(bounds))
-                    //                    addLine = true
-                } else if (indexPath.row == tableView.numberOfRowsInSection(indexPath.section)-1) {
-                    CGPathMoveToPoint(pathRef, nil, CGRectGetMinX(bounds), CGRectGetMinY(bounds))
-                    CGPathAddArcToPoint(pathRef, nil, CGRectGetMinX(bounds), CGRectGetMaxY(bounds), CGRectGetMidX(bounds), CGRectGetMaxY(bounds), cornerRadius)
-                    CGPathAddArcToPoint(pathRef, nil, CGRectGetMaxX(bounds), CGRectGetMaxY(bounds), CGRectGetMaxX(bounds), CGRectGetMidY(bounds), cornerRadius)
-                    CGPathAddLineToPoint(pathRef, nil, CGRectGetMaxX(bounds), CGRectGetMinY(bounds))
+                      pathRef.move(to: CGPoint(x:bounds.minX, y: bounds.maxY))
+                      pathRef.addArc(tangent1End: CGPoint(x:bounds.minX, y:bounds.minY), tangent2End: CGPoint(x:bounds.midX, y:bounds.minY), radius: cornerRadius)
+                      pathRef.addArc(tangent1End: CGPoint(x:bounds.maxX, y:bounds.minY), tangent2End: CGPoint(x:bounds.maxX, y:bounds.midY), radius: cornerRadius)
+                      pathRef.addLine(to: CGPoint(x:bounds.maxX, y: bounds.maxY))
+//                    CGPathMoveToPoint(pathRef, nil, bounds.minX, bounds.maxY)
+//                    CGPathAddArcToPoint(pathRef, nil, bounds.minX, bounds.minY, bounds.midX, bounds.minY, cornerRadius)
+//                    CGPathAddArcToPoint(pathRef, nil, bounds.maxX, bounds.minY, bounds.maxX, bounds.midY, cornerRadius)
+//                    CGPathAddLineToPoint(pathRef, nil, bounds.maxX, bounds.maxY)
+                    addLine = true
+                } else if (indexPath.row == tableView.numberOfRows(inSection: indexPath.section)-1) {
+                    
+                    pathRef.move(to: CGPoint(x:bounds.minX, y: bounds.minY))
+                    pathRef.addArc(tangent1End: CGPoint(x:bounds.minX, y:bounds.maxY), tangent2End: CGPoint(x:bounds.midX, y:bounds.maxY), radius: cornerRadius)
+                    pathRef.addArc(tangent1End: CGPoint(x:bounds.maxX, y:bounds.maxY), tangent2End: CGPoint(x:bounds.maxX, y:bounds.midY), radius: cornerRadius)
+                    pathRef.addLine(to: CGPoint(x:bounds.maxX, y: bounds.minY))
+                    
+//                    CGPathMoveToPoint(pathRef, nil, bounds.minX, bounds.minY)
+//                    CGPathAddArcToPoint(pathRef, nil, bounds.minX, bounds.maxY, bounds.midX, bounds.maxY, cornerRadius)
+//                    CGPathAddArcToPoint(pathRef, nil, bounds.maxX, bounds.maxY, bounds.maxX, bounds.midY, cornerRadius)
+//                    CGPathAddLineToPoint(pathRef, nil, bounds.maxX, bounds.minY)
                 } else {
-                    CGPathAddRect(pathRef, nil, bounds)
+                      pathRef.addRect(bounds)
+//                    CGPathAddRect(pathRef, nil, bounds)
                     addLine = true
                 }
                 layer.path = pathRef
                 
                 if tableupdata{
                 if indexPath.row == 0{
-                    if checkdata(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[0])){
-                        layer.fillColor = UIColor(red: 255/255, green: 99/255, blue: 71/255, alpha: 1.0).CGColor
+                    if checkdata(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[0])){
+                        layer.fillColor = UIColor(red: 255/255, green: 99/255, blue: 71/255, alpha: 1.0).cgColor
                         upflag = true
                     }else{
-                        layer.fillColor = UIColor(red: 60/255, green: 179/255, blue: 113/255, alpha: 1.0).CGColor
+                        layer.fillColor = UIColor(red: 60/255, green: 179/255, blue: 113/255, alpha: 1.0).cgColor
                     }
                 }else{
                     let crow = indexPath.row - 1
-                    if checkdataless(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[0]), less: String((((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[0])){
-                        layer.fillColor = UIColor(red: 255/255, green: 250/255, blue: 205/255, alpha: 0.9).CGColor
+                    if checkdataless(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[0]), less: String(describing: (((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.section] as! NSArray)[1] as! NSArray)[crow] as! NSArray)[0])){
+                        layer.fillColor = UIColor(red: 255/255, green: 250/255, blue: 205/255, alpha: 0.9).cgColor
                     }else{
-                        layer.fillColor = UIColor.whiteColor().CGColor
+                        layer.fillColor = UIColor.white.cgColor
                     }
                 }
                 }else if tablealert{
-                    layer.fillColor = UIColor.whiteColor().CGColor
+                    layer.fillColor = UIColor.white.cgColor
                 }else{
-                    layer.fillColor = UIColor.whiteColor().CGColor
+                    layer.fillColor = UIColor.white.cgColor
                 }
                 
                 if addLine {
                     let lineLayer: CALayer = CALayer()
-                    let lineHeight: CGFloat = (1.0 / UIScreen.mainScreen().scale)
-                    lineLayer.frame = CGRectMake(CGRectGetMinX(bounds), bounds.size.height-lineHeight, bounds.size.width, lineHeight)
-                    lineLayer.backgroundColor = UIColor(red: 169/255, green: 169/255, blue: 169/255, alpha: 1).CGColor
+                    let lineHeight: CGFloat = (1.0 / UIScreen.main.scale)
+                    lineLayer.frame = CGRect(x: bounds.minX, y: bounds.size.height-lineHeight, width: bounds.size.width, height: lineHeight)
+                    lineLayer.backgroundColor = UIColor(red: 169/255, green: 169/255, blue: 169/255, alpha: 1).cgColor
                     layer.addSublayer(lineLayer)
                 }
                 
                 let testView: UIView = UIView(frame: bounds)
-                testView.layer.insertSublayer(layer, atIndex: 0)
-                testView.backgroundColor = UIColor.clearColor()
+                testView.layer.insertSublayer(layer, at: 0)
+                testView.backgroundColor = UIColor.clear
                 cell.backgroundView = testView
             }
         }
     }
 
-    func ftschead(date: String)->String{
-        let cdate = date.componentsSeparatedByString(" ")
+    func ftschead(_ date: String)->String{
+        let cdate = date.components(separatedBy: " ")
         var cdatestr: String!
         if cdate.count == 2{
           cdatestr = "\(cdate[1]), \(cdate[0])"
@@ -532,10 +580,10 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         return cdatestr
     }
     
-    func ftshbodytime(date: String, num: Int)->[String]{
-        let cdate = date.componentsSeparatedByString("-")
+    func ftshbodytime(_ date: String, num: Int)->[String]{
+        let cdate = date.components(separatedBy: "-")
         if cdate.count == 2{
-            let ccdate = cdate[num].componentsSeparatedByString(":")
+            let ccdate = cdate[num].components(separatedBy: ":")
             if ccdate.count == 2{
             return ccdate
             }else{
@@ -546,9 +594,9 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    func ftcbodyindcolor(type: String)->UIColor{
+    func ftcbodyindcolor(_ type: String)->UIColor{
         var color: UIColor
-        switch type.lowercaseString{
+        switch type.lowercased(){
         case "лек.":
             color = UIColor(red: 60/255, green: 179/255, blue: 113/255, alpha: 1)
             break
@@ -576,7 +624,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
         return color
     }
-    func ftcbodyaud(aud: String)->NSArray{
+    func ftcbodyaud(_ aud: String)->NSArray{
         var ad: String = aud
         if aud == "ауд. ,"{
         ad = "аудитория не указана"
@@ -585,9 +633,9 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         return [ad, true]
         }
     }
-    func ftcbodygroup(group: String)->String{
+    func ftcbodygroup(_ group: String)->String{
         var str: [String]!
-        str = group.componentsSeparatedByString(" ")
+        str = group.components(separatedBy: " ")
         if str.count == 2{
             return str[1]
         }else{
@@ -597,11 +645,11 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     func refreshinit(){
         refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "")
-        refreshControl.tintColor = UIColor.orangeColor()
-        refreshControl.addTarget(self, action: #selector(ViewSheduleVC.refresh(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        refreshControl.tintColor = UIColor.orange
+        refreshControl.addTarget(self, action: #selector(ViewSheduleVC.refresh(_:)), for: UIControlEvents.valueChanged)
         tableView.addSubview(refreshControl)
     }
-    func refresh(sender:AnyObject) {
+    func refresh(_ sender:AnyObject) {
         refreshBegin("Refresh",
             refreshEnd: {(x:Int) -> () in
                 self.sheduleviewsheduleinit(false)
@@ -609,23 +657,23 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         })
     }
     
-    func refreshBegin(newtext:String, refreshEnd:(Int) -> ()) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+    func refreshBegin(_ newtext:String, refreshEnd:@escaping (Int) -> ()) {
+        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.default).async {
+            self.defaults.set(true, forKey: "SheduleSettingupdate")
             self.defaults.synchronize()
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 refreshEnd(0)
             }
         }
     }
     
-    func checkdata(date: String)->Bool{
-        let currentDate = NSDate()
-        let dateFormatter = NSDateFormatter()
+    func checkdata(_ date: String)->Bool{
+        let currentDate = Date()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy"
-        dateFormatter.locale = NSLocale.currentLocale()
-        let convertedDate = dateFormatter.stringFromDate(currentDate)
-        let cdate = date.componentsSeparatedByString(" ")
+        dateFormatter.locale = Locale.current
+        let convertedDate = dateFormatter.string(from: currentDate)
+        let cdate = date.components(separatedBy: " ")
         if cdate.count == 2{
             if cdate[0] == convertedDate{
                 return true
@@ -637,14 +685,14 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
     }
     
-    func checkdataless(date: String, less: String)->Bool{
+    func checkdataless(_ date: String, less: String)->Bool{
         let lesstime = [[830, 1005], [1015, 1150], [1200, 1335], [1400, 1535], [1545, 1720], [1730, 1905], [1915, 2050]]
         if checkdata(date){
-            let currentDate = NSDate()
-            let dateFormatter = NSDateFormatter()
+            let currentDate = Date()
+            let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "Hmm"
-            dateFormatter.locale = NSLocale.currentLocale()
-            let convertedDate = dateFormatter.stringFromDate(currentDate)
+            dateFormatter.locale = Locale.current
+            let convertedDate = dateFormatter.string(from: currentDate)
             let lessa: Int = Int(less)!-1
             let sless: Int = lesstime[lessa][0]
             let fless: Int = lesstime[lessa][1]
@@ -660,20 +708,20 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func defaultscroll(){
-        self.tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 0), atScrollPosition: .Top, animated: true)
+        self.tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
     }
     
     func autoscrolltable(){
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
-            dispatch_async(dispatch_get_main_queue()) {
-                if let flag = self.defaults.objectForKey("SheduleSettingAutoScroll"){
+        let priority = DispatchQueue.GlobalQueuePriority.default
+        DispatchQueue.global(priority: priority).async {
+            DispatchQueue.main.async {
+                if let flag = self.defaults.object(forKey: "SheduleSettingAutoScroll"){
                     if flag as! Bool{
                         let shedulearray: NSArray = ((self.SFjson["data"] as! NSDictionary)["data"] as! NSArray)
                         var flagscroll: Bool = false
-                        for (index, item) in shedulearray.enumerate(){
-                            if self.checkdata(String((item as! NSArray)[0])){
-                                self.tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: index), atScrollPosition: .Top, animated: true)
+                        for (index, item) in shedulearray.enumerated(){
+                            if self.checkdata(String(describing: (item as! NSArray)[0])){
+                                self.tableView.scrollToRow(at: IndexPath(row: 0, section: index), at: .top, animated: true)
                                 flagscroll = true
                             }
                         }
@@ -688,11 +736,11 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func mainfeedbackappstore(){
-        if self.defaults.objectForKey("scopeload") == nil{
-            self.defaults.setObject(0, forKey: "scopeload")
+        if self.defaults.object(forKey: "scopeload") == nil{
+            self.defaults.set(0, forKey: "scopeload")
             self.defaults.synchronize()
         }else{
-            if self.defaults.objectForKey("scopeload") as! Int == 10{
+            if self.defaults.object(forKey: "scopeload") as! Int == 10{
                 
                 func myCancelCallbackCancel() {
                     self.repiataskfeedback()
@@ -708,57 +756,57 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                     cancelButtonText: "Скрыть",
                     color: UIColorFromHex(0x3498db, alpha: 1)
                 )
-                alertview.setTextTheme(.Light)
+                alertview.setTextTheme(.light)
                 alertview.addCancelAction(myCancelCallbackCancel)
                 alertview.addAction(myCancelCallback)
                 
                 
             }
-            var scope = self.defaults.objectForKey("scopeload") as! Int
+            var scope = self.defaults.object(forKey: "scopeload") as! Int
 //            print(scope)
             scope = scope+1
-            self.defaults.setObject(scope, forKey: "scopeload")
+            self.defaults.set(scope, forKey: "scopeload")
             self.defaults.synchronize()
         }
     }
     
     
     func openappstore(){
-        UIApplication.sharedApplication().openURL(NSURL(string: "itms-apps://itunes.apple.com/ru/app/raspisanie-belgu/id1080402611")!)
+        UIApplication.shared.openURL(URL(string: "itms-apps://itunes.apple.com/ru/app/raspisanie-belgu/id1080402611")!)
     }
     func repiataskfeedback(){
-        self.defaults.setObject(0, forKey: "scopeload")
+        self.defaults.set(0, forKey: "scopeload")
         self.defaults.synchronize()
     }
     
     func initswipetableview(){
         let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(ViewSheduleVC.handleSwipes(_:)))
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(ViewSheduleVC.handleSwipes(_:)))
-        leftSwipe.direction = .Left
-        rightSwipe.direction = .Right
-        tableView.userInteractionEnabled = true
+        leftSwipe.direction = .left
+        rightSwipe.direction = .right
+        tableView.isUserInteractionEnabled = true
         tableView.addGestureRecognizer(leftSwipe)
         tableView.addGestureRecognizer(rightSwipe)
     }
     
-    func handleSwipes(sender:UISwipeGestureRecognizer) {
-        if (sender.direction == .Left) {
+    func handleSwipes(_ sender:UISwipeGestureRecognizer) {
+        if (sender.direction == .left) {
             print("Swipe Left")
-            if defaults.objectForKey("SheduleSettingSwipeTable") != nil{
-            if tableupdata && defaults.objectForKey("SheduleSettingSwipeTable") as! Bool{
-            if self.defaults.objectForKey("SheduleSettingtime") != nil{
-            let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-            dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            if defaults.object(forKey: "SheduleSettingSwipeTable") != nil{
+            if tableupdata && defaults.object(forKey: "SheduleSettingSwipeTable") as! Bool{
+            if self.defaults.object(forKey: "SheduleSettingtime") != nil{
+            let priority = DispatchQueue.GlobalQueuePriority.default
+            DispatchQueue.global(priority: priority).async {
             var flags: Bool = false
-            var num: Int = self.defaults.objectForKey("SheduleSettingtime") as! Int
+            var num: Int = self.defaults.object(forKey: "SheduleSettingtime") as! Int
             if num == 0 || num == 1{
                 num = num+1
                 flags = true
-                self.defaults.setObject(num, forKey: "SheduleSettingtime")
-                self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+                self.defaults.set(num, forKey: "SheduleSettingtime")
+                self.defaults.set(true, forKey: "SheduleSettingupdate")
                 self.defaults.synchronize()
             }
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
               if flags{
                         self.tableanimation(0)
                 }
@@ -769,23 +817,23 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
             
         }
-        if (sender.direction == .Right) {
+        if (sender.direction == .right) {
             print("Swipe Right")
-            if defaults.objectForKey("SheduleSettingSwipeTable") != nil{
-            if tableupdata && defaults.objectForKey("SheduleSettingSwipeTable") as! Bool{
-                if self.defaults.objectForKey("SheduleSettingtime") != nil{
-                    let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-                    dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            if defaults.object(forKey: "SheduleSettingSwipeTable") != nil{
+            if tableupdata && defaults.object(forKey: "SheduleSettingSwipeTable") as! Bool{
+                if self.defaults.object(forKey: "SheduleSettingtime") != nil{
+                    let priority = DispatchQueue.GlobalQueuePriority.default
+                    DispatchQueue.global(priority: priority).async {
                         var flags: Bool = false
-                        var num: Int = self.defaults.objectForKey("SheduleSettingtime") as! Int
+                        var num: Int = self.defaults.object(forKey: "SheduleSettingtime") as! Int
                         if num == 1 || num == 2{
                             num = num-1
                             flags = true
-                            self.defaults.setObject(num, forKey: "SheduleSettingtime")
-                            self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+                            self.defaults.set(num, forKey: "SheduleSettingtime")
+                            self.defaults.set(true, forKey: "SheduleSettingupdate")
                             self.defaults.synchronize()
                         }
-                        dispatch_async(dispatch_get_main_queue()) {
+                        DispatchQueue.main.async {
                             if flags{
                                 self.tableanimation(0)
                             }
@@ -798,8 +846,8 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
         
     }
     
-    func tableanimation(num: CGFloat){
-        UIView.animateWithDuration(0.3, animations: {
+    func tableanimation(_ num: CGFloat){
+        UIView.animate(withDuration: 0.3, animations: {
             self.tableView.alpha = num
             }, completion: { _ in
                 self.sheduleviewsheduleinit(true)
@@ -807,20 +855,20 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func mainshedulesave(){
-        defaults.setObject(SFjson, forKey: "sheduledata")
-        defaults.setObject(false, forKey: "SheduleSettingupdate")
+        defaults.set(SFjson, forKey: "sheduledata")
+        defaults.set(false, forKey: "SheduleSettingupdate")
         defaults.synchronize()
     }
     
     func setactualweek(){
-        self.defaults.setObject(nowweeksun(), forKey: "Shedule_actualweek")
+        self.defaults.set(nowweeksun(), forKey: "Shedule_actualweek")
         self.defaults.synchronize()
     }
     
     
     func checkactualweek()->Bool{
-        if let lastweek = self.defaults.objectForKey("Shedule_actualweek"){
-            if (lastweek as! Int == nowweeksun()) || (self.defaults.objectForKey("SheduleSettingtime") as! Int == 3){
+        if let lastweek = self.defaults.object(forKey: "Shedule_actualweek"){
+            if (lastweek as! Int == nowweeksun()) || (self.defaults.object(forKey: "SheduleSettingtime") as! Int == 3){
                 return true
             }else{
                 return false
@@ -831,12 +879,12 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func nowweeksun()->Int{
-        var currentDate = NSDate()
-        let dateFormatter = NSDateFormatter()
-        dateFormatter.locale = NSLocale.currentLocale()
+        var currentDate = Date()
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale.current
         dateFormatter.dateFormat = "E"
-        let strday = dateFormatter.stringFromDate(currentDate)
-        var intweek: NSTimeInterval!
+        let strday = dateFormatter.string(from: currentDate)
+        var intweek: TimeInterval!
         switch strday{
         case "Mon":
             intweek = 6
@@ -863,9 +911,9 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             intweek = 0
             break
         }
-        currentDate = NSDate(timeIntervalSinceNow: intweek*24*60*60)
+        currentDate = Date(timeIntervalSinceNow: intweek*24*60*60)
         dateFormatter.dateFormat = "dMyyyy"
-        let nowsun = dateFormatter.stringFromDate(currentDate)
+        let nowsun = dateFormatter.string(from: currentDate)
         return Int(nowsun)!
     }
     
@@ -881,7 +929,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     
     func chromtimerstart(){
         if openview{
-        chromtimer = NSTimer.scheduledTimerWithTimeInterval(60, target: self, selector: #selector(ViewSheduleVC.updateactualsectionchron), userInfo: nil, repeats: true)
+        chromtimer = Timer.scheduledTimer(timeInterval: 60, target: self, selector: #selector(ViewSheduleVC.updateactualsectionchron), userInfo: nil, repeats: true)
         print("chromtimerstart")
         }
     }
@@ -895,11 +943,11 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     
     func updateactualsectionchron(){
         if upflag && self.checkactualweek() && tableupdata{
-        let currentDate = NSDate()
-        let dateFormatter = NSDateFormatter()
+        let currentDate = Date()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "Hmm"
-        dateFormatter.locale = NSLocale.currentLocale()
-        let convertedDate = dateFormatter.stringFromDate(currentDate)
+        dateFormatter.locale = Locale.current
+        let convertedDate = dateFormatter.string(from: currentDate)
         let lesstime = [0, 830, 1005, 1015, 1150, 1200, 1335, 1400, 1535, 1545, 1720, 1730, 1905, 1915, 2050]
         for ttime in lesstime{
             if ttime == Int(convertedDate){
@@ -913,18 +961,18 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func shedulereload(){
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
-            dispatch_async(dispatch_get_main_queue()) {
+        let priority = DispatchQueue.GlobalQueuePriority.default
+        DispatchQueue.global(priority: priority).async {
+            DispatchQueue.main.async {
                 self.sheduleviewsheduleinit(false)
             }
         }
     }
     
     func shedulereloaddata(){
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
-            dispatch_async(dispatch_get_main_queue()) {
+        let priority = DispatchQueue.GlobalQueuePriority.default
+        DispatchQueue.global(priority: priority).async {
+            DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
         }
@@ -932,7 +980,7 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     
     func inittimerstart(){
         openview = true
-        chromtimer = NSTimer.scheduledTimerWithTimeInterval(60, target: self, selector: #selector(ViewSheduleVC.updateactualsectionchron), userInfo: nil, repeats: true)
+        chromtimer = Timer.scheduledTimer(timeInterval: 60, target: self, selector: #selector(ViewSheduleVC.updateactualsectionchron), userInfo: nil, repeats: true)
         print("start timer when open view")
     }
     
@@ -943,21 +991,21 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func localnotification(){
-        if let flag = defaults.objectForKey("SheduleSettingLocalNotification"){
+        if let flag = defaults.object(forKey: "SheduleSettingLocalNotification"){
             if flag as! Bool{
                 
-        UIApplication.sharedApplication().cancelAllLocalNotifications()
+        UIApplication.shared.cancelAllLocalNotifications()
                 
         let shedulearray: NSArray = ((self.SFjson["data"] as! NSDictionary)["data"] as! NSArray)
-        for (_, item) in shedulearray.enumerate(){
+        for (_, item) in shedulearray.enumerated(){
             var temp_week: String = (item as! NSArray)[0] as! String
-            let cdate = temp_week.componentsSeparatedByString(" ")
+            let cdate = temp_week.components(separatedBy: " ")
             temp_week = cdate[0]
             let shedulelessarray: NSArray = (item as! NSArray)[1] as! NSArray
             var tempnumber: String!
             
-            for (_, item_t) in shedulelessarray.enumerate(){
-                if tempnumber == nil || tempnumber != String((item_t as! NSArray)[0]){
+            for (_, item_t) in shedulelessarray.enumerated(){
+                if tempnumber == nil || tempnumber != String(describing: (item_t as! NSArray)[0]){
                     var timenotification: String!
                     var titlenotification: String!
                     let lesstimenotif = ["8-25", "10-10", "11-50", "13-55", "15-40", "17-25", "19-10"]
@@ -988,12 +1036,12 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                         break
                     }
                     var auditor: String!
-                    switch self.defaults.objectForKey("SheduleSettingSourseShedule") as! Int {
+                    switch self.defaults.object(forKey: "SheduleSettingSourseShedule") as! Int {
                     case 0:
-                        auditor = String((item_t as! NSArray)[6])
+                        auditor = String(describing: (item_t as! NSArray)[6])
                         break
                     case 1:
-                        auditor = String((item_t as! NSArray)[5])
+                        auditor = String(describing: (item_t as! NSArray)[5])
                         break
                     default:
                         auditor = ""
@@ -1010,8 +1058,8 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
                     let localNotification = UILocalNotification()
                     localNotification.fireDate = notifdate(timenotification)
                     localNotification.alertBody = titlenotification
-                    localNotification.timeZone = NSTimeZone.defaultTimeZone()
-                    UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
+                    localNotification.timeZone = TimeZone.current
+                    UIApplication.shared.scheduleLocalNotification(localNotification)
 //                    print("Установленно уведомление на \(timenotification) с текстом \(titlenotification)")
                     }
                     
@@ -1023,19 +1071,19 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
      }
     }
     
-    func notifdate(dateString: String)-> NSDate{
-        let dateFormatter = NSDateFormatter()
+    func notifdate(_ dateString: String)-> Date{
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy-H-mm"
-        return dateFormatter.dateFromString(dateString)!
+        return dateFormatter.date(from: dateString)!
     }
     
-    func checknotifdate(ndate: NSDate)->Bool{
-        let currentDate = NSDate()
-        let dateFormatter = NSDateFormatter()
+    func checknotifdate(_ ndate: Date)->Bool{
+        let currentDate = Date()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "ddMMyyyyHmm"
-        dateFormatter.locale = NSLocale.currentLocale()
-        let nowdata = dateFormatter.stringFromDate(currentDate)
-        let notifdate = dateFormatter.stringFromDate(ndate)
+        dateFormatter.locale = Locale.current
+        let nowdata = dateFormatter.string(from: currentDate)
+        let notifdate = dateFormatter.string(from: ndate)
         if Int(notifdate) > Int(nowdata) || Int(notifdate) == Int(nowdata){
             return true
         }else{
@@ -1044,48 +1092,48 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
     }
     
     func thisday()->String{
-        let currentDate = NSDate()
-        let dateFormatter = NSDateFormatter()
+        let currentDate = Date()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy"
-        dateFormatter.locale = NSLocale.currentLocale()
-        let convertedDate = dateFormatter.stringFromDate(currentDate)
+        dateFormatter.locale = Locale.current
+        let convertedDate = dateFormatter.string(from: currentDate)
         return convertedDate
     }
     
-    func newindicatorreload(text: String){
+    func newindicatorreload(_ text: String){
         SwiftSpinner.show(text, animated:false).addTapHandler({
             self.sheduleviewsheduleinit(false)
         })
     }
     
-    func customsheduletitle(labeltext: String, sublabeltext: String, doublelabel: Bool){
+    func customsheduletitle(_ labeltext: String, sublabeltext: String, doublelabel: Bool){
         if doublelabel{
-            let navBarTitleView = UIView(frame: CGRectMake(0.0, 0.0, self.navigationController!.navigationBar.frame.size.width, self.navigationController!.navigationBar.frame.size.height))
+            let navBarTitleView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: self.navigationController!.navigationBar.frame.size.width, height: self.navigationController!.navigationBar.frame.size.height))
 //            navBarTitleView.clipsToBounds = true
 //            navBarTitleView.autoresizingMask = UIViewAutoresizing.FlexibleWidth
             
-            let label = UILabel(frame: CGRectMake(0, 0, self.navigationController!.navigationBar.frame.size.width, 20))
-            label.center = CGPointMake(self.navigationController!.navigationBar.frame.size.width/2, self.navigationController!.navigationBar.frame.size.height/3)
-            label.textAlignment = NSTextAlignment.Center
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: self.navigationController!.navigationBar.frame.size.width, height: 20))
+            label.center = CGPoint(x: self.navigationController!.navigationBar.frame.size.width/2, y: self.navigationController!.navigationBar.frame.size.height/3)
+            label.textAlignment = NSTextAlignment.center
             label.text = labeltext
-            label.font = UIFont.boldSystemFontOfSize(17)
+            label.font = UIFont.boldSystemFont(ofSize: 17)
             label.numberOfLines = 1;
-            label.autoresizingMask = UIViewAutoresizing.FlexibleWidth
+            label.autoresizingMask = UIViewAutoresizing.flexibleWidth
             label.adjustsFontSizeToFitWidth = true
             navBarTitleView.addSubview(label)
             
-            let sublabel = UILabel(frame: CGRectMake(0, 0, self.navigationController!.navigationBar.frame.size.width, 20))
-            sublabel.center = CGPointMake(self.navigationController!.navigationBar.frame.size.width/2, self.navigationController!.navigationBar.frame.size.height/1.3)
-            sublabel.textAlignment = NSTextAlignment.Center
+            let sublabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.navigationController!.navigationBar.frame.size.width, height: 20))
+            sublabel.center = CGPoint(x: self.navigationController!.navigationBar.frame.size.width/2, y: self.navigationController!.navigationBar.frame.size.height/1.3)
+            sublabel.textAlignment = NSTextAlignment.center
             sublabel.text = sublabeltext
-            sublabel.font = sublabel.font.fontWithSize(14)
+            sublabel.font = sublabel.font.withSize(14)
             sublabel.textColor = UIColor(red: 65/255, green: 105/255, blue: 225/255, alpha: 1)
             sublabel.numberOfLines = 1;
             sublabel.adjustsFontSizeToFitWidth = true
-            sublabel.autoresizingMask = UIViewAutoresizing.FlexibleWidth
+            sublabel.autoresizingMask = UIViewAutoresizing.flexibleWidth
             navBarTitleView.addSubview(sublabel)
             
-            navBarTitleView.backgroundColor = UIColor.clearColor()
+            navBarTitleView.backgroundColor = UIColor.clear
             
             self.navigationItem.titleView = navBarTitleView
         }
@@ -1100,20 +1148,20 @@ class ViewSheduleVC: UIViewController, UITableViewDataSource, UITableViewDelegat
             hidingNavBarManager?.manageBottomBar(tabBar)
         }
         self.tableView.frame = self.view.bounds
-        self.tableView.autoresizingMask = [.FlexibleBottomMargin, .FlexibleHeight, .FlexibleWidth, .FlexibleTopMargin, .FlexibleLeftMargin, .FlexibleRightMargin]
+        self.tableView.autoresizingMask = [.flexibleBottomMargin, .flexibleHeight, .flexibleWidth, .flexibleTopMargin, .flexibleLeftMargin, .flexibleRightMargin]
     }
     
     func custombg(){
-        self.tableView.backgroundColor = UIColor.clearColor()
+        self.tableView.backgroundColor = UIColor.clear
         let gradient:CAGradientLayer = CAGradientLayer()
         gradient.frame.size = self.view.frame.size
-        gradient.colors = [UIColor(red: 0 / 255.0, green: 57 / 255.0, blue: 115 / 255.0, alpha: 1).CGColor, UIColor(red: 229 / 255.0, green: 229 / 255.0, blue: 190 / 255.0, alpha: 1).CGColor]
+        gradient.colors = [UIColor(red: 0 / 255.0, green: 57 / 255.0, blue: 115 / 255.0, alpha: 1).cgColor, UIColor(red: 229 / 255.0, green: 229 / 255.0, blue: 190 / 255.0, alpha: 1).cgColor]
         gradient.zPosition = -1
         self.view.layer.addSublayer(gradient)
     }
     
-    func nocashe(text: String)->String{
-        if let nocashe = defaults.objectForKey("nocashe"){
+    func nocashe(_ text: String)->String{
+        if let nocashe = defaults.object(forKey: "nocashe"){
             if nocashe as! Bool{
                 return "\(text)&debag_mode=on"
             }else if !(nocashe as! Bool){

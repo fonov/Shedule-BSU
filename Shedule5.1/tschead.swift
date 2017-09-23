@@ -18,14 +18,14 @@ class tschead: UITableViewCell {
         cellinit()
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
     }
     
     func cellinit(){
-        tlabel.textColor = UIColor.whiteColor()
+        tlabel.textColor = UIColor.white
     }
 
 }

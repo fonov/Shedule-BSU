@@ -12,7 +12,7 @@ class SheduleSettingTime: UITableViewController {
     
     var shedulesettingtimearray = [[["shedulesettingtimecell", "Прошлая неделя", false], ["shedulesettingtimecell", "Текущая неделя", false], ["shedulesettingtimecell", "Следующая неделя", false], ["shedulesettingtimecell", "Задать дату", false, ""]], []]
     
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
     
 //    let nc = NSNotificationCenter.defaultCenter()
     
@@ -33,7 +33,7 @@ class SheduleSettingTime: UITableViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         shedulesettingtimeinit()
 //        shedulesettingtimecustomdetal()
     }
@@ -41,7 +41,7 @@ class SheduleSettingTime: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         
         let sectioncount: Int = shedulesettingtimearray.count
@@ -53,12 +53,12 @@ class SheduleSettingTime: UITableViewController {
         return sectioncount
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return shedulesettingtimearray[section].count
     }
 
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         var height: CGFloat = 44
         if shedulesettingtimearray[indexPath.section][indexPath.row][0] as? String == "shedulesettingtimecellcust"{
             height = 300
@@ -66,12 +66,12 @@ class SheduleSettingTime: UITableViewController {
         return height
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         var cell = UITableViewCell()
         
         if shedulesettingtimearray[indexPath.section][indexPath.row][0] as? String == "shedulesettingtimecell"{
-        cell = tableView.dequeueReusableCellWithIdentifier("shedulesettingtimecell", forIndexPath: indexPath)
+        cell = tableView.dequeueReusableCell(withIdentifier: "shedulesettingtimecell", for: indexPath)
 
         if shedulesettingtimearray[indexPath.section][indexPath.row].count == 4{
             cell.detailTextLabel?.text = shedulesettingtimearray[indexPath.section][indexPath.row][3] as? String
@@ -81,27 +81,27 @@ class SheduleSettingTime: UITableViewController {
 
         cell.textLabel?.text = shedulesettingtimearray[indexPath.section][indexPath.row][1] as? String
         if shedulesettingtimearray[indexPath.section][indexPath.row][2] as! Bool{
-            cell.accessoryType = .Checkmark
+            cell.accessoryType = .checkmark
         }else{
-            cell.accessoryType = .None
+            cell.accessoryType = .none
         }
             
         }
         if shedulesettingtimearray[indexPath.section][indexPath.row][0] as? String == "shedulesettingtimecellcust"{
-            cell = tableView.dequeueReusableCellWithIdentifier("shedulesettingtimecellcust", forIndexPath: indexPath)
+            cell = tableView.dequeueReusableCell(withIdentifier: "shedulesettingtimecellcust", for: indexPath)
         }
 
-        cell.selectionStyle = .None
+        cell.selectionStyle = .none
         
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         if shedulesettingtimearray[indexPath.section][indexPath.row][0] as? String == "shedulesettingtimecell"{
         
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+        let priority = DispatchQueue.GlobalQueuePriority.default
+        DispatchQueue.global(priority: priority).async {
             self.shedulesettingtimearray[indexPath.section][0][2] = false
             self.shedulesettingtimearray[indexPath.section][1][2] = false
             self.shedulesettingtimearray[indexPath.section][2][2] = false
@@ -109,37 +109,37 @@ class SheduleSettingTime: UITableViewController {
             self.shedulesettingtimearray[indexPath.section][indexPath.row][2] = true
             
             
-            self.defaults.setObject(indexPath.row, forKey: "SheduleSettingtime")
-            self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+            self.defaults.set(indexPath.row, forKey: "SheduleSettingtime")
+            self.defaults.set(true, forKey: "SheduleSettingupdate")
             self.defaults.synchronize()
             
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 if self.shedulesettingtimearray[indexPath.section][3][2] as! Bool{
                     if self.shedulesettingtimearray[1].count == 0{
                         self.shedulesettingtimearray[1].append(["shedulesettingtimecellcust"])
-                        tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 1)], withRowAnimation: UITableViewRowAnimation.Fade)
+                        tableView.insertRows(at: [IndexPath(row: 0, section: 1)], with: UITableViewRowAnimation.fade)
                     }
                 }else{
                     if self.shedulesettingtimearray[1].count == 1{
-                        self.shedulesettingtimearray[1].removeAtIndex(0)
-                        tableView.deleteRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 1)],withRowAnimation: UITableViewRowAnimation.Fade)
+                        self.shedulesettingtimearray[1].remove(at: 0)
+                        tableView.deleteRows(at: [IndexPath(row: 0, section: 1)],with: UITableViewRowAnimation.fade)
                     }
                 }
-                tableView.reloadRowsAtIndexPaths([NSIndexPath(forItem: 3, inSection: indexPath.section), NSIndexPath(forItem: 2, inSection: indexPath.section), NSIndexPath(forItem: 1, inSection: indexPath.section), NSIndexPath(forItem: 0, inSection: indexPath.section)], withRowAnimation: UITableViewRowAnimation.None)
+                tableView.reloadRows(at: [IndexPath(item: 3, section: indexPath.section), IndexPath(item: 2, section: indexPath.section), IndexPath(item: 1, section: indexPath.section), IndexPath(item: 0, section: indexPath.section)], with: UITableViewRowAnimation.none)
                 
           }
         }
       }
     }
     
-    func shedulesettingsub(text: String){
+    func shedulesettingsub(_ text: String){
         self.navigationItem.title = text
-        self.tabBarController?.tabBar.hidden = true
+        self.tabBarController?.tabBar.isHidden = true
     }
 
  
     func shedulesettingtimeinit(){
-        if let data = defaults.objectForKey("SheduleSettingtime"){
+        if let data = defaults.object(forKey: "SheduleSettingtime"){
             shedulesettingtimearray[0][data as! Int][2] = true
             if data as! Int == 3{
                 self.shedulesettingtimearray[1].append(["shedulesettingtimecellcust"])

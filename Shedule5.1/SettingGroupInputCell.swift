@@ -11,8 +11,8 @@ import UIKit
 class SettingGroupInputCell: UITableViewCell {
 
     @IBOutlet weak var groupinput: UITextField!
-    let nc = NSNotificationCenter.defaultCenter()
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
     var grouparray = [[AnyObject]]()
     
     override func awakeFromNib() {
@@ -21,50 +21,50 @@ class SettingGroupInputCell: UITableViewCell {
         shedulesettinggroupcellinit()
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }    
-    @IBAction func eventgrinput(sender: AnyObject) {
+    @IBAction func eventgrinput(_ sender: AnyObject) {
         if groupinput.text!.characters.count != 0{
-            self.defaults.setObject(String(UTF8String: groupinput.text!), forKey: "SheduleSettingSourseGroupID")
-            self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+            self.defaults.set(String(validatingUTF8: groupinput.text!), forKey: "SheduleSettingSourseGroupID")
+            self.defaults.set(true, forKey: "SheduleSettingupdate")
             self.defaults.synchronize()
             seacrhgpush(groupinput.text!)
         }
         groupinput.resignFirstResponder()
-        nc.postNotificationName("funcfromgrouptosetting", object: nil)
+        nc.post(name: Notification.Name(rawValue: "funcfromgrouptosetting"), object: nil)
     }
     
     func shedulesettinggroupcellinit(){
-        groupinput.keyboardAppearance = UIKeyboardAppearance.Dark
+        groupinput.keyboardAppearance = UIKeyboardAppearance.dark
         groupinput.placeholder = "Введите номер группы"
     }
     
-    func seacrhgpush(group: String){
+    func seacrhgpush(_ group: String){
         sgupdate()
-        for (index, _) in grouparray.enumerate() {
-            grouparray[index][1] = false
+        for (index, _) in grouparray.enumerated() {
+            grouparray[index][1] = false as AnyObject
         }
-        grouparray.append([group, true])
+        grouparray.append([group as AnyObject, true as AnyObject])
         sgsave()
         print(grouparray)
     }
     func sgsave(){
         if grouparray.count != 0{
-            self.defaults.setObject(grouparray, forKey: "SheduleSettingGroupArray")
+            self.defaults.set(grouparray, forKey: "SheduleSettingGroupArray")
             self.defaults.synchronize()}
         else{
             self.sgdell()
         }
     }
     func sgdell(){
-        self.defaults.removeObjectForKey("SheduleSettingGroupArray")
+        self.defaults.removeObject(forKey: "SheduleSettingGroupArray")
     }
     
     func sgupdate(){
-        if defaults.objectForKey("SheduleSettingGroupArray") != nil{
-            grouparray = defaults.objectForKey("SheduleSettingGroupArray") as! [[AnyObject]]
+        if defaults.object(forKey: "SheduleSettingGroupArray") != nil{
+            grouparray = defaults.object(forKey: "SheduleSettingGroupArray") as! [[AnyObject]]
         }
     }
 

@@ -24,17 +24,18 @@ class SFpostjson{
         
         returndict = ["data": [], "code": 00, "status": false]
         
-        let request = NSMutableURLRequest(URL: NSURL(string: self.url)!)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = self.post.dataUsingEncoding(NSUTF8StringEncoding)
+        let request = NSMutableURLRequest(url: URL(string: self.url)!)
+        request.httpMethod = "POST"
+        request.httpBody = self.post.data(using: String.Encoding.utf8)
         
-        let semaphore = dispatch_semaphore_create(0)
+        let semaphore = DispatchSemaphore(value: 0)
         
-        _ = NSURLSession.sharedSession().dataTaskWithRequest(request) {
+        
+        _ = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: {
             data, response, error in
             
             if error != nil{
-                if error!.code == -1009{
+                if error!._code == -1009{
                     returndict = ["data": [], "code": 01, "status": false]
                 }
                 else{
@@ -44,7 +45,7 @@ class SFpostjson{
                 }
             }else{
                 do {
-                    let jsondata: NSDictionary = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
+                    let jsondata: NSDictionary = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.mutableContainers) as! NSDictionary
                     if(jsondata["status"] as! Bool){
                         returndict = ["data": jsondata, "code": 03, "status": true]
                     }else{
@@ -54,10 +55,10 @@ class SFpostjson{
                     returndict = ["data": [], "code": 05, "status": false]
                 }
             }
-            dispatch_semaphore_signal(semaphore)
-            }.resume()
+            semaphore.signal()
+            }) .resume()
         
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+        semaphore.wait(timeout: DispatchTime.distantFuture)
         return returndict
     }
     

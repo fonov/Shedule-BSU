@@ -17,7 +17,7 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
     @IBOutlet weak var activeload: UIActivityIndicatorView!
     @IBOutlet weak var activelabel: UILabel!
     
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
     var SFjson: NSDictionary!
     var showtableteach: Bool = false
     var searcharray = [[AnyObject]]()
@@ -30,7 +30,7 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         searchbarinit()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         nav(false)
         tableViewinit()
         stinit()
@@ -41,23 +41,23 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         // Dispose of any resources that can be recreated.
     }
     
-    func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         nav(true)
     }
     
-    func searchBarTextDidEndEditing(searchBar: UISearchBar) {
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         
     }
     
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         nav(false)
     }
     
-    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         nav(false)
     }
     
-    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         teachinit(searchText)
         stext = searchText
     }
@@ -66,48 +66,48 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         SearchBar.delegate = self
         SearchBar.placeholder = "Введите фамилию преподавателя"
         SearchBar.barTintColor = UIColor(red: 211/255, green: 211/255, blue: 211/255, alpha: 1)
-        SearchBar.layer.borderColor = UIColor(red: 211/255, green: 211/255, blue: 211/255, alpha: 1).CGColor
+        SearchBar.layer.borderColor = UIColor(red: 211/255, green: 211/255, blue: 211/255, alpha: 1).cgColor
         SearchBar.layer.borderWidth = 1
-        SearchBar.keyboardAppearance = UIKeyboardAppearance.Dark
+        SearchBar.keyboardAppearance = UIKeyboardAppearance.dark
     }
     
     
     func tableViewinit(){
-        tableView.tableFooterView = UIView(frame:CGRectZero)
+        tableView.tableFooterView = UIView(frame:CGRect.zero)
         notable("educative", textlabel: "Начните искать преподавателей")
     }
     
-    func nav(flag: Bool){
+    func nav(_ flag: Bool){
         self.navigationController?.setNavigationBarHidden(flag, animated: true)
         if !flag{
             self.SearchBar.showsCancelButton = false;
             SearchBar.resignFirstResponder()
-            let view = UIView(frame: CGRect(x: 0.0, y: 0.0, width: UIScreen.mainScreen().bounds.size.width, height: 20.0))
-            view.backgroundColor = UIColor.clearColor()
+            let view = UIView(frame: CGRect(x: 0.0, y: 0.0, width: UIScreen.main.bounds.size.width, height: 20.0))
+            view.backgroundColor = UIColor.clear
             self.view.addSubview(view)
         }else{
             self.SearchBar.showsCancelButton = true;
-            let uiButton = SearchBar.valueForKey("cancelButton") as! UIButton
-            uiButton.setTitle("Отмена", forState: UIControlState.Normal)
-            let view = UIView(frame: CGRect(x: 0.0, y: 0.0, width: UIScreen.mainScreen().bounds.size.width, height: 20.0))
+            let uiButton = SearchBar.value(forKey: "cancelButton") as! UIButton
+            uiButton.setTitle("Отмена", for: UIControlState())
+            let view = UIView(frame: CGRect(x: 0.0, y: 0.0, width: UIScreen.main.bounds.size.width, height: 20.0))
             view.backgroundColor = UIColor(red: 211/255, green: 211/255, blue: 211/255, alpha: 1)
             self.view.addSubview(view)
         }
     }
     
-    func teachinit(text: String){
+    func teachinit(_ text: String){
         if text.characters.count == 0{
             notable("educative", textlabel: "Начните искать преподавателей")
             stinit()
         }else{
             self.loadjson(true)
-            let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-            dispatch_async(dispatch_get_global_queue(priority, 0)) {
+            let priority = DispatchQueue.GlobalQueuePriority.default
+            DispatchQueue.global(priority: priority).async {
                 
                 let SFCpostjson = SFpostjson(in_post: "name=\(text)", in_url: "http://lab.lionrepair.ru/uapp/api_teach.php")
                 self.SFjson = SFCpostjson.json
                 
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     
                     let codejson: Int = self.SFjson["code"] as! Int
                     switch codejson{
@@ -135,12 +135,12 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func shedulesettingsub(text: String){
+    func shedulesettingsub(_ text: String){
         self.navigationItem.title = text
-        self.tabBarController?.tabBar.hidden = true
+        self.tabBarController?.tabBar.isHidden = true
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         if showtableteach{
             return 1
         }else if showtablesearch{
@@ -150,9 +150,15 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if showtableteach{
-            return SFjson["data"]!["data"]!!.count
+            var count: Int
+            if (SFjson != nil){
+                count = ((SFjson["data"] as! [String:AnyObject])["data"]?.count)!
+            } else {
+                count = 1
+            }
+            return count
         }else if showtablesearch{
             return searcharray.count
         }else{
@@ -160,14 +166,20 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if showtableteach{
-            if SFjson["data"]!["data"]!!.count == 1{
-                return "По запросу \"\(stext)\" найден \(SFjson["data"]!["data"]!!.count) преподаватель"
-            }else if SFjson["data"]!["data"]!!.count < 5{
-                return "По запросу \"\(stext)\" найдено \(SFjson["data"]!["data"]!!.count) преподавателя"
+            var count: Int
+            if (SFjson != nil){
+                count = ((SFjson["data"] as! [String:AnyObject])["data"]?.count)!
+            } else {
+                count = 1
+            }
+            if count == 1{
+                return "По запросу \"\(stext)\" найден \(count) преподаватель"
+            }else if count < 5{
+                return "По запросу \"\(stext)\" найдено \(count) преподавателя"
             }else{
-                return "По запросу \"\(stext)\" найдено \(SFjson["data"]!["data"]!!.count) преподавателей"
+                return "По запросу \"\(stext)\" найдено \(count) преподавателей"
             }
         }else if showtablesearch{
             if searcharray.count == 1{
@@ -181,19 +193,19 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if showtableteach{
-        let cell = tableView.dequeueReusableCellWithIdentifier("shedulesettingteachcell", forIndexPath: indexPath)
-        cell.textLabel?.text = "\(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[2])) \(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[3])) \(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[4]))"
-        cell.accessoryType = .None
+        let cell = tableView.dequeueReusableCell(withIdentifier: "shedulesettingteachcell", for: indexPath)
+        cell.textLabel?.text = "\(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[2])) \(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[3])) \(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[4]))"
+        cell.accessoryType = .none
         return cell
         } else if showtablesearch{
-           let cell = tableView.dequeueReusableCellWithIdentifier("shedulesettingteachcell", forIndexPath: indexPath)
-           cell.selectionStyle = .None
+           let cell = tableView.dequeueReusableCell(withIdentifier: "shedulesettingteachcell", for: indexPath)
+           cell.selectionStyle = .none
             if searcharray[indexPath.row][2] as! Bool{
-                cell.accessoryType = .Checkmark
+                cell.accessoryType = .checkmark
             }else{
-                cell.accessoryType = .None
+                cell.accessoryType = .none
             }
            cell.textLabel?.text = searcharray[indexPath.row][1] as? String
            return cell
@@ -202,45 +214,45 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if showtableteach{
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        let teachid = String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[1])
-        let teachname = "\(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[2])) \(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[3])) \(String((((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[4]))"
+        tableView.deselectRow(at: indexPath, animated: true)
+        let teachid = String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[1])
+        let teachname = "\(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[2])) \(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[3])) \(String(describing: (((SFjson["data"] as! NSDictionary)["data"] as! NSArray)[indexPath.row] as! NSArray)[4]))"
         let SheduleSettingSourseTeachID = [teachid, teachname]
         seacrhteachpush(teachid, teachname: teachname)
-        self.defaults.setObject(SheduleSettingSourseTeachID, forKey: "SheduleSettingSourseTeachID")
-        self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+        self.defaults.set(SheduleSettingSourseTeachID, forKey: "SheduleSettingSourseTeachID")
+        self.defaults.set(true, forKey: "SheduleSettingupdate")
         self.defaults.synchronize()
         nav(false)
-        self.navigationController?.popViewControllerAnimated(true)
+        self.navigationController?.popViewController(animated: true)
         }
         if showtablesearch{
-            for (index, _) in searcharray.enumerate() {
-                searcharray[index][2] = false
+            for (index, _) in searcharray.enumerated() {
+                searcharray[index][2] = false as AnyObject
             }
-            searcharray[indexPath.row][2] = true
-            self.defaults.setObject([String(searcharray[indexPath.row][0]), String(searcharray[indexPath.row][1])], forKey: "SheduleSettingSourseTeachID")
-            self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+            searcharray[indexPath.row][2] = true as AnyObject
+            self.defaults.set([String(describing: searcharray[indexPath.row][0]), String(describing: searcharray[indexPath.row][1])], forKey: "SheduleSettingSourseTeachID")
+            self.defaults.set(true, forKey: "SheduleSettingupdate")
             self.defaults.synchronize()
             stsave()
             stupdate()
             nav(false)
-            self.navigationController?.popViewControllerAnimated(true)
+            self.navigationController?.popViewController(animated: true)
         }
     }
-    func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         if showtablesearch{
-            let dell = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Удалить") { action, index in
+            let dell = UITableViewRowAction(style: UITableViewRowActionStyle.default, title: "Удалить") { action, index in
                 if self.searcharray[indexPath.row][2] as! Bool{
-                    self.defaults.removeObjectForKey("SheduleSettingSourseTeachID")
-                    self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+                    self.defaults.removeObject(forKey: "SheduleSettingSourseTeachID")
+                    self.defaults.set(true, forKey: "SheduleSettingupdate")
                     self.defaults.synchronize()
                 }
-                self.searcharray.removeAtIndex(indexPath.row)
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                self.searcharray.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .fade)
                 if self.searcharray.count == 1{
-                    tableView.reloadSections(NSIndexSet(index: indexPath.section), withRowAnimation: .None)
+                    tableView.reloadSections(IndexSet(integer: indexPath.section), with: .none)
                 }
                 self.stsave()
                 self.stupdate()
@@ -251,7 +263,7 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if showtablesearch{
             return true
         }else{
@@ -276,78 +288,78 @@ class SheduleSettingSourseTeach: UIViewController, UISearchBarDelegate, UITableV
     }
     
     func jsoncode04(){
-        notable("cross31", textlabel: self.SFjson["data"]!["info"] as! String)
+        notable("cross31", textlabel: (self.SFjson["data"] as? [String:Any])!["info"] as! String)
     }
     
     func jsoncode05(){
         notable("cross31", textlabel: "Невозможно обработать данные")
     }
     
-    func notable(textimg: String, textlabel: String){
+    func notable(_ textimg: String, textlabel: String){
         showtableteach = false
         showtablesearch = false
         infoimage.image = UIImage(named: textimg)
         infolabel.text = textlabel
-        tableView.hidden = true
+        tableView.isHidden = true
         loadjson(false)
     }
     
     func ontable(){
         showtableteach = true
         showtablesearch = false
-        self.tableView.hidden = false
+        self.tableView.isHidden = false
         self.tableView.reloadData()
         loadjson(false)
     }
     
-    func loadjson(flag: Bool){
+    func loadjson(_ flag: Bool){
         if flag{
             activeload.startAnimating()
-            activelabel.hidden = false
-            tableView.hidden = flag
+            activelabel.isHidden = false
+            tableView.isHidden = flag
         }else{
             activeload.stopAnimating()
-            activelabel.hidden = true
+            activelabel.isHidden = true
         }
-        infolabel.hidden = flag
-        infoimage.hidden = flag
+        infolabel.isHidden = flag
+        infoimage.isHidden = flag
     }
     
-    func seacrhteachpush(teachid: String, teachname: String){
+    func seacrhteachpush(_ teachid: String, teachname: String){
         stupdate()
-        for (index, _) in searcharray.enumerate() {
-            searcharray[index][2] = false
+        for (index, _) in searcharray.enumerated() {
+            searcharray[index][2] = false as AnyObject
         }
-        searcharray.append([teachid, teachname, true])
+        searcharray.append([teachid as AnyObject, teachname as AnyObject, true as AnyObject])
         print(searcharray)
         stsave()
     }
     
     func stsave(){
         if searcharray.count != 0{
-            self.defaults.setObject(searcharray, forKey: "SheduleSettingSearchTeach")
+            self.defaults.set(searcharray, forKey: "SheduleSettingSearchTeach")
             self.defaults.synchronize()}
         else{
             self.stdell()
         }
     }
     func stupdate(){
-        if defaults.objectForKey("SheduleSettingSearchTeach") != nil{
-            searcharray = defaults.objectForKey("SheduleSettingSearchTeach") as! [[AnyObject]]
+        if defaults.object(forKey: "SheduleSettingSearchTeach") != nil{
+            searcharray = defaults.object(forKey: "SheduleSettingSearchTeach") as! [[AnyObject]]
         }else{
             showtablesearch = false
-            tableView.hidden = true
+            tableView.isHidden = true
         }
     }
     func stdell(){
-        self.defaults.removeObjectForKey("SheduleSettingSearchTeach")
+        self.defaults.removeObject(forKey: "SheduleSettingSearchTeach")
     }
     func stinit(){
-        if defaults.objectForKey("SheduleSettingSearchTeach") != nil{
-            searcharray = defaults.objectForKey("SheduleSettingSearchTeach") as! [[AnyObject]]
+        if defaults.object(forKey: "SheduleSettingSearchTeach") != nil{
+            searcharray = defaults.object(forKey: "SheduleSettingSearchTeach") as! [[AnyObject]]
             showtableteach = false
             showtablesearch = true
-            tableView.hidden = false
+            tableView.isHidden = false
             tableView.reloadData()
         }
     }

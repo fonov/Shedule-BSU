@@ -14,8 +14,8 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     
     var settingcell = [[], [["settingrow", ["О приложении"], "segueaboutpageview"], ["settingrow", ["Web Расписание"], "openweb"], ["settingrow", ["Помощь в улучшении приложения"], "sendmail"]]]
     
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     
     var list = [SKProduct]()
     var p = SKProduct()
@@ -25,24 +25,24 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         deletecooke()
         initads()
         setsegmenttonavigationbar()
-        nc.addObserver(self, selector: #selector(SettingTVC.shedulesettingsoursereload), name: "funcshedulesettingsoursereload", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutswitch), name: "funcinstructionaboutswitch", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutautoscroll), name: "funcinstructionaboutautoscroll", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutLocalNotification), name: "funcinstructionaboutLocalNotification", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutnotLocalNotification), name: "funcinstructionaboutnotLocalNotification", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.alertads), name: "funcalertads", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.alertinfoaboutlimits), name: "funcalertinfoaboutlimits", object: nil)
-        nc.addObserver(self, selector: #selector(SettingTVC.aboutcashe), name: "funcaboutcashe", object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.shedulesettingsoursereload), name: NSNotification.Name(rawValue: "funcshedulesettingsoursereload"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutswitch), name: NSNotification.Name(rawValue: "funcinstructionaboutswitch"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutautoscroll), name: NSNotification.Name(rawValue: "funcinstructionaboutautoscroll"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutLocalNotification), name: NSNotification.Name(rawValue: "funcinstructionaboutLocalNotification"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.instructionaboutnotLocalNotification), name: NSNotification.Name(rawValue: "funcinstructionaboutnotLocalNotification"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.alertads), name: NSNotification.Name(rawValue: "funcalertads"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.alertinfoaboutlimits), name: NSNotification.Name(rawValue: "funcalertinfoaboutlimits"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingTVC.aboutcashe), name: NSNotification.Name(rawValue: "funcaboutcashe"), object: nil)
       }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         checkinappstore()
         shedulesettingsoursereload()
         checkallowlocalnotification()
         shedulerootviewcontroller("Настройки")
     }
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return false
     }
     
@@ -53,18 +53,18 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
 
     // MARK: - Table view data source
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return settingcell.count
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return settingcell[section].count
     }
     
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         //let cell = tableView.dequeueReusableCellWithIdentifier("settingrow", forIndexPath: indexPath)
         
@@ -72,43 +72,43 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         
         if settingcell[indexPath.section][indexPath.row][0] as! String == "settingrow"{
             
-            cell = tableView.dequeueReusableCellWithIdentifier(settingcell[indexPath.section][indexPath.row][0] as! String, forIndexPath: indexPath)
+            cell = tableView.dequeueReusableCell(withIdentifier: settingcell[indexPath.section][indexPath.row][0] as! String, for: indexPath)
             
-            if settingcell[indexPath.section][indexPath.row][1].count == 1{
-                cell.textLabel?.text = String((((settingcell[indexPath.section] as NSArray)[indexPath.row] as! NSArray)[1] as! NSArray)[0])
-                cell.accessoryType = .DisclosureIndicator
+            if (settingcell[indexPath.section][indexPath.row][1] as AnyObject).count == 1{
+                cell.textLabel?.text = String(describing: (((settingcell[indexPath.section] as NSArray)[indexPath.row] as! NSArray)[1] as! NSArray)[0])
+                cell.accessoryType = .disclosureIndicator
             }else{
-                cell.textLabel?.text = String((((settingcell[indexPath.section] as NSArray)[indexPath.row] as! NSArray)[1] as! NSArray)[0])
-                cell.detailTextLabel?.text = String((((settingcell[indexPath.section] as NSArray)[indexPath.row] as! NSArray)[1] as! NSArray)[1])
-                cell.accessoryType = .DisclosureIndicator
+                cell.textLabel?.text = String(describing: (((settingcell[indexPath.section] as NSArray)[indexPath.row] as! NSArray)[1] as! NSArray)[0])
+                cell.detailTextLabel?.text = String(describing: (((settingcell[indexPath.section] as NSArray)[indexPath.row] as! NSArray)[1] as! NSArray)[1])
+                cell.accessoryType = .disclosureIndicator
             }
             
         }
         
         if settingcell[indexPath.section][indexPath.row][0] as! String == "settingsourse"{
             
-            cell = tableView.dequeueReusableCellWithIdentifier(settingcell[indexPath.section][indexPath.row][0] as! String, forIndexPath: indexPath)
+            cell = tableView.dequeueReusableCell(withIdentifier: settingcell[indexPath.section][indexPath.row][0] as! String, for: indexPath)
             cell.separatorInset = UIEdgeInsetsMake(0, 10000, 0, 0)
         }
         
         if settingcell[indexPath.section][indexPath.row][0] as! String == "settingautoscroll" || settingcell[indexPath.section][indexPath.row][0] as! String == "settingswipetable" || settingcell[indexPath.section][indexPath.row][0] as! String == "settingnoads" || settingcell[indexPath.section][indexPath.row][0] as! String == "settingnocashe"{
             
-            cell = tableView.dequeueReusableCellWithIdentifier(self.settingcell[indexPath.section][indexPath.row][0] as! String, forIndexPath: indexPath)
+            cell = tableView.dequeueReusableCell(withIdentifier: self.settingcell[indexPath.section][indexPath.row][0] as! String, for: indexPath)
         }
         
         if settingcell[indexPath.section][indexPath.row][0] as! String == "settinglocalnotification"{
             
-           let celll = tableView.dequeueReusableCellWithIdentifier(self.settingcell[indexPath.section][indexPath.row][0] as! String, forIndexPath: indexPath) as! SettingLocalNotification
+           let celll = tableView.dequeueReusableCell(withIdentifier: self.settingcell[indexPath.section][indexPath.row][0] as! String, for: indexPath) as! SettingLocalNotification
             
-            if let settings = UIApplication.sharedApplication().currentUserNotificationSettings()
+            if let settings = UIApplication.shared.currentUserNotificationSettings
             {
-                if settings.types.contains([.Alert, .Badge])
+                if settings.types.contains([.alert, .badge])
                 {}
                 else
                 {
-                    if let flag = defaults.objectForKey("SheduleSettingLocalNotification"){
+                    if let flag = defaults.object(forKey: "SheduleSettingLocalNotification"){
                         if flag as! Bool{
-                            defaults.setObject(false, forKey: "SheduleSettingLocalNotification")
+                            defaults.set(false, forKey: "SheduleSettingLocalNotification")
                             defaults.synchronize()
                         }
                     }
@@ -117,10 +117,10 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             }
             
             celll.label.text = "Уведомление о начале пары"
-            if let flag = defaults.objectForKey("SheduleSettingLocalNotification"){
-                celll.sswipe.on = flag as! Bool
+            if let flag = defaults.object(forKey: "SheduleSettingLocalNotification"){
+                celll.sswipe.isOn = flag as! Bool
             }else{
-                celll.sswipe.on = false
+                celll.sswipe.isOn = false
             }
             return celll
         }
@@ -129,26 +129,26 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if settingcell[indexPath.section][indexPath.row].count == 3{
             if settingcell[indexPath.section][indexPath.row][2] as! String == "openweb"{
             safariopenwebshedule()
             }else if settingcell[indexPath.section][indexPath.row][2] as! String == "sendmail"{
                 let mailComposeViewController = configuredMailComposeViewController()
                 if MFMailComposeViewController.canSendMail() {
-                    self.presentViewController(mailComposeViewController, animated: true, completion: nil)
+                    self.present(mailComposeViewController, animated: true, completion: nil)
                 } else {
                     self.showSendMailErrorAlert()
                 }
             }else{
-                performSegueWithIdentifier(settingcell[indexPath.section][indexPath.row][2] as! String, sender: nil)
+                performSegue(withIdentifier: settingcell[indexPath.section][indexPath.row][2] as! String, sender: nil)
             }
         }
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    func shedulerootviewcontroller(text: String){
-        self.tabBarController?.tabBar.hidden = false
+    func shedulerootviewcontroller(_ text: String){
+        self.tabBarController?.tabBar.isHidden = false
         self.navigationItem.title = text
     }
     
@@ -159,54 +159,54 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             ]
         let segmentedControl = UISegmentedControl(items: segmentTitles)
         segmentedControl.selectedSegmentIndex = 0
-        segmentedControl.autoresizingMask = UIViewAutoresizing.FlexibleWidth
+        segmentedControl.autoresizingMask = UIViewAutoresizing.flexibleWidth
         // change the width from 400.0 to something you want if it's needed
-        segmentedControl.frame = CGRectMake(0, 0, view.frame.width, 30.0)
-        segmentedControl.addTarget(self, action: #selector(SettingTVC.segmentedControlValueChanged), forControlEvents:.ValueChanged)
+        segmentedControl.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 30.0)
+        segmentedControl.addTarget(self, action: #selector(SettingTVC.segmentedControlValueChanged), for:.valueChanged)
         self.navigationItem.titleView = segmentedControl
         
-        if let data = defaults.objectForKey("SheduleSettingSourseShedule"){
+        if let data = defaults.object(forKey: "SheduleSettingSourseShedule"){
             segmentedControl.selectedSegmentIndex = data as! Int
         }else{
             segmentedControl.selectedSegmentIndex = 0
-            defaults.setObject(segmentedControl.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
+            defaults.set(segmentedControl.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
             defaults.synchronize()
         }
     }
     
-    func segmentedControlValueChanged(segment: UISegmentedControl) {
-        defaults.setObject(segment.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
-        defaults.setObject(true, forKey: "SheduleSettingupdate")
+    func segmentedControlValueChanged(_ segment: UISegmentedControl) {
+        defaults.set(segment.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
+        defaults.set(true, forKey: "SheduleSettingupdate")
         defaults.synchronize()
         shedulesettingsoursereload()
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     let backItem = UIBarButtonItem()
     backItem.title = "Назад"
     navigationItem.backBarButtonItem = backItem
-    self.tabBarController?.tabBar.hidden = true
+    self.tabBarController?.tabBar.isHidden = true
     }
 
     func shedulesettingsoursereload(){
     shedulesettingsoursereloadinit()
     shedulesettingweek()
-    tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0), NSIndexPath(forRow: 1, inSection: 0)], withRowAnimation: .None)
+    tableView.reloadRows(at: [IndexPath(row: 0, section: 0), IndexPath(row: 1, section: 0)], with: .none)
     }
     
     func shedulesettingsoursereloadinit(){
-        if let data = defaults.objectForKey("SheduleSettingSourseShedule"){
+        if let data = defaults.object(forKey: "SheduleSettingSourseShedule"){
             switch data as! Int{
             case 0:
-                if let data1 = defaults.objectForKey("SheduleSettingSourseGroupID"){
+                if let data1 = defaults.object(forKey: "SheduleSettingSourseGroupID"){
                  settingcell[0][1] = ["settingrow", ["Группа", data1], "segueshedulesettingsoursegroup"]
                 }else{
                  settingcell[0][1] = ["settingrow", ["Группа", "не выбрана"], "segueshedulesettingsoursegroup"]
                 }
                 break
             case 1:
-                if let data2 = defaults.objectForKey("SheduleSettingSourseTeachID"){
-                 settingcell[0][1] = ["settingrow", ["Преподаватель", data2[1]], "shedulesettingsourseteach"]
+                if let data2 = defaults.object(forKey: "SheduleSettingSourseTeachID"){
+                 settingcell[0][1] = ["settingrow", ["Преподаватель", (data2 as! AnyObject)[1] as! String], "shedulesettingsourseteach"]
                 }else{
                   settingcell[0][1] = ["settingrow", ["Преподаватель", "не выбран"], "shedulesettingsourseteach"]
                 }
@@ -221,7 +221,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     }
     
     func shedulesettingweek(){
-        if let data = defaults.objectForKey("SheduleSettingtime"){
+        if let data = defaults.object(forKey: "SheduleSettingtime"){
             switch data as! Int{
             case 0:
                 settingcell[0][0] = ["settingrow", ["Время расписания", "прошлая неделя"], "seguesheduletime"]
@@ -233,10 +233,10 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
                 settingcell[0][0] = ["settingrow", ["Время расписания", "следующая неделя"], "seguesheduletime"]
                 break
             case 3:
-                if defaults.objectForKey("SheduleSettingCustomdatefist") != nil && defaults.objectForKey("SheduleSettingCustomdatelast") != nil{
-                 let fistdate = defaults.objectForKey("SheduleSettingCustomdatefist") as! NSArray
-                 let lastdate = defaults.objectForKey("SheduleSettingCustomdatelast") as! NSArray
-                 settingcell[0][0] = ["settingrow", ["Время расписания", "\(String(fistdate[1]))-\(String(lastdate[1]))"], "seguesheduletime"]
+                if defaults.object(forKey: "SheduleSettingCustomdatefist") != nil && defaults.object(forKey: "SheduleSettingCustomdatelast") != nil{
+                 let fistdate = defaults.object(forKey: "SheduleSettingCustomdatefist") as! NSArray
+                 let lastdate = defaults.object(forKey: "SheduleSettingCustomdatelast") as! NSArray
+                 settingcell[0][0] = ["settingrow", ["Время расписания", "\(String(describing: fistdate[1]))-\(String(describing: lastdate[1]))"], "seguesheduletime"]
                 }else{
                  settingcell[0][0] = ["settingrow", ["Время расписания", "не задана дата"], "seguesheduletime"]
                 }
@@ -251,7 +251,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     }
     
     func safariopenwebshedule(){
-        UIApplication.sharedApplication().openURL(NSURL(string: "http://lab.lionrepair.ru/uapp/demo")!)
+        UIApplication.shared.openURL(URL(string: "http://lab.lionrepair.ru/uapp/demo")!)
     }
     
     func configuredMailComposeViewController() -> MFMailComposeViewController {
@@ -260,7 +260,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         
         mailComposerVC.setToRecipients(["ask@mounlion.com"])
         mailComposerVC.setSubject("Помощь в улучшение приложения \"Расписание БелГУ\"")
-        mailComposerVC.setMessageBody("<h1 style=\"border-bottom: 2px solid black;text-align: center;\">\"Расписание БелГУ\"</h1><small>Не удаляйте эту информацию (\(UIDevice.currentDevice().modelName); \(UIDevice.currentDevice().systemVersion))</small>", isHTML: true)
+        mailComposerVC.setMessageBody("<h1 style=\"border-bottom: 2px solid black;text-align: center;\">\"Расписание БелГУ\"</h1><small>Не удаляйте эту информацию (\(UIDevice.current.modelName); \(UIDevice.current.systemVersion))</small>", isHTML: true)
         return mailComposerVC
     }
     
@@ -280,15 +280,15 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     
     // MARK: MFMailComposeViewControllerDelegate
     
-    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
-        controller.dismissViewControllerAnimated(true, completion: nil)
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
     }
     
-    func smartalert(title: String, message: String, ok: String, cancel: String){
+    func smartalert(_ title: String, message: String, ok: String, cancel: String){
     }
     
     func openappstore(){
-        UIApplication.sharedApplication().openURL(NSURL(string: "itms-apps://itunes.apple.com/ru/app/raspisanie-belgu/id1080402611")!)
+        UIApplication.shared.openURL(URL(string: "itms-apps://itunes.apple.com/ru/app/raspisanie-belgu/id1080402611")!)
     }
     
     func instructionaboutswitch(){
@@ -297,10 +297,10 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             title: "Быстрое переключение недель",
             text: "Смахивайте расписание влево или вправо для переключение недель",
             buttonText: "Скрыть подсказку",
-            iconImage: UIImage(named: "technology"),
-            color: UIColorFromHex(0x3498db, alpha: 1)
+            color: UIColorFromHex(0x3498db, alpha: 1),
+            iconImage: UIImage(named: "technology")
         )
-        alertview.setTextTheme(.Light)
+        alertview.setTextTheme(.light)
     }
     
     func instructionaboutautoscroll(){
@@ -309,10 +309,10 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             title: "Автоматическая прокрутка расписания",
             text: "Мы будем автоматически прокручивать расписание до текущего дня",
             buttonText: "Скрыть подсказку",
-            iconImage: UIImage(named: "technology"),
-            color: UIColorFromHex(0x3498db, alpha: 1)
+            color: UIColorFromHex(0x3498db, alpha: 1),
+            iconImage: UIImage(named: "technology")
         )
-        alertview.setTextTheme(.Light)
+        alertview.setTextTheme(.light)
     }
     
     func instructionaboutLocalNotification(){
@@ -321,10 +321,10 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             title: "Уведомление о начале пары",
             text: "За 5 минут до начала пары мы будем уведомлять вас об этом",
             buttonText: "Скрыть подсказку",
-            iconImage: UIImage(named: "technology"),
-            color: UIColorFromHex(0x3498db, alpha: 1)
+            color: UIColorFromHex(0x3498db, alpha: 1),
+            iconImage: UIImage(named: "technology")
         )
-        alertview.setTextTheme(.Light)
+        alertview.setTextTheme(.light)
     }
     
     func instructionaboutnotLocalNotification(){
@@ -336,13 +336,13 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         )
     }
     
-    func alertinfoaboutlimits(notification: NSNotification){
-        let userInfo:Dictionary<String,String!> = notification.userInfo as! Dictionary<String,String!>
-        SweetAlert().showAlert("Опс...", subTitle: "Для включения этой функции \"\(userInfo["title"]!)\" сначала нужно отключить ограничения", style: AlertStyle.Warning, buttonTitle:"Скрыть")
+    func alertinfoaboutlimits(_ notification: Notification){
+        let userInfo:Dictionary<String,String?> = notification.userInfo as! Dictionary<String,String?>
+        SweetAlert().showAlert("Опс...", subTitle: "Для включения этой функции \"\(userInfo["title"]!!)\" сначала нужно отключить ограничения", style: AlertStyle.warning, buttonTitle:"Скрыть")
     }
     
     func checkallowlocalnotification(){
-        tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 4, inSection: 0)], withRowAnimation: .None)
+        tableView.reloadRows(at: [IndexPath(row: 4, section: 0)], with: .none)
     }
     
     
@@ -357,20 +357,20 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     
     func alertads(){
         //Создадим Alert контроллер
-        let alertController = UIAlertController(title: "Отключение ограничений", message: nil, preferredStyle: .Alert)
+        let alertController = UIAlertController(title: "Отключение ограничений", message: nil, preferredStyle: .alert)
         
-        let noadsAction = UIAlertAction(title: "Отключить ограничения", style: UIAlertActionStyle.Default) {
+        let noadsAction = UIAlertAction(title: "Отключить ограничения", style: UIAlertActionStyle.default) {
             UIAlertAction in
             print("Отключить рекламу")
             self.buyinappstore()
         }
-        let restoreadsAction = UIAlertAction(title: "Восстановить покупки", style: UIAlertActionStyle.Default) {
+        let restoreadsAction = UIAlertAction(title: "Восстановить покупки", style: UIAlertActionStyle.default) {
             UIAlertAction in
             print("Восстановить покупки")
             self.restoreinappstore()
         }
         
-        let cancelAction = UIAlertAction(title: "Отмена", style: UIAlertActionStyle.Cancel) {
+        let cancelAction = UIAlertAction(title: "Отмена", style: UIAlertActionStyle.cancel) {
             UIAlertAction in
             print("Отмена")
             self.switchnoads()
@@ -389,15 +389,15 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         alertController.addAction(cancelAction)
         
         // Вывод Alert контроллера
-        self.presentViewController(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
     }
     
     func removeads(){
         if !limitation().check{
         limitation().offlimitation
-        let indexpath: NSIndexPath = NSIndexPath(forRow: settingcell[0].count-1, inSection: 0)
-        settingcell[0].removeAtIndex(indexpath.row)
-        tableView.deleteRowsAtIndexPaths([indexpath], withRowAnimation: .Fade)
+        let indexpath: IndexPath = IndexPath(row: settingcell[0].count-1, section: 0)
+        settingcell[0].remove(at: indexpath.row)
+        tableView.deleteRows(at: [indexpath], with: .fade)
         print("Delete ads")
         }
     }
@@ -415,7 +415,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         }
     }
     
-    func productsRequest(request: SKProductsRequest, didReceiveResponse response: SKProductsResponse) {
+    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         print("product request")
         let myProduct = response.products
         for product in myProduct {
@@ -426,7 +426,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             print(product.price)
             list.append(product)
         }
-        nc.postNotificationName("funcswitchenable", object: nil)
+        nc.post(name: Notification.Name(rawValue: "funcswitchenable"), object: nil)
     }
     
     func buyinappstore(){
@@ -441,18 +441,18 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     }
     
     func restoreinappstore(){
-        SKPaymentQueue.defaultQueue().addTransactionObserver(self)
-        SKPaymentQueue.defaultQueue().restoreCompletedTransactions()
+        SKPaymentQueue.default().add(self)
+        SKPaymentQueue.default().restoreCompletedTransactions()
     }
     
     func buyProduct() {
         print("buy " + p.productIdentifier)
         let pay = SKPayment(product: p)
-        SKPaymentQueue.defaultQueue().addTransactionObserver(self)
-        SKPaymentQueue.defaultQueue().addPayment(pay as SKPayment)
+        SKPaymentQueue.default().add(self)
+        SKPaymentQueue.default().add(pay as SKPayment)
     }
     
-    func paymentQueueRestoreCompletedTransactionsFinished(queue: SKPaymentQueue) {
+    func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         print("transactions restored")
         for transaction in queue.transactions {
             let t: SKPaymentTransaction = transaction
@@ -468,12 +468,12 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         }
     }
     
-    func paymentQueue(queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: NSError) {
+    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         print("failed restore");
         switchnoads()
     }
     
-    func paymentQueue(queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         print("add paymnet")
         
         for transaction:AnyObject in transactions {
@@ -482,7 +482,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
             
             switch trans.transactionState {
                 
-            case .Purchased:
+            case .purchased:
                 print("buy, ok unlock iap here")
                 print(p.productIdentifier)
                 
@@ -496,7 +496,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
                 }
                 queue.finishTransaction(trans)
                 break;
-            case .Failed:
+            case .failed:
                 print("buy error")
                 queue.finishTransaction(trans)
                 break;
@@ -508,27 +508,27 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
         }
     }
     
-    func finishTransaction(trans:SKPaymentTransaction)
+    func finishTransaction(_ trans:SKPaymentTransaction)
     {
         print("finish trans")
-        SKPaymentQueue.defaultQueue().finishTransaction(trans)
+        SKPaymentQueue.default().finishTransaction(trans)
     }
-    func paymentQueue(queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction])
+    func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction])
     {
         print("remove trans");
         switchnoads()
     }
     
     func switchnoads(){
-        NSNotificationCenter.defaultCenter().postNotificationName("funcnoads", object: nil)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "funcnoads"), object: nil)
     }
     
     func deletecooke(){
-        if defaults.objectForKey("deletecooke") == nil{
-            defaults.removeObjectForKey("SheduleSettingAutoScroll")
-            defaults.removeObjectForKey("SheduleSettingSwipeTable")
-            defaults.removeObjectForKey("SheduleSettingLocalNotification")
-            defaults.setObject(true, forKey: "deletecooke")
+        if defaults.object(forKey: "deletecooke") == nil{
+            defaults.removeObject(forKey: "SheduleSettingAutoScroll")
+            defaults.removeObject(forKey: "SheduleSettingSwipeTable")
+            defaults.removeObject(forKey: "SheduleSettingLocalNotification")
+            defaults.set(true, forKey: "deletecooke")
             defaults.synchronize()
             print("delete cooke")
         }
@@ -539,7 +539,7 @@ class SettingTVC: UITableViewController, MFMailComposeViewControllerDelegate, SK
     }
     
     func aboutcashe(){
-        SweetAlert().showAlert("Загрузка кэшированных данных", subTitle: "Для повышения отказа устойчивости и быстроты загрузки данных мы используем кэширование данных. В некоторых случаях расписание может не совпадать с официальной версией расписания.", style: AlertStyle.None, buttonTitle: "Скрыть")
+        SweetAlert().showAlert("Загрузка кэшированных данных", subTitle: "Для повышения отказа устойчивости и быстроты загрузки данных мы используем кэширование данных. В некоторых случаях расписание может не совпадать с официальной версией расписания.", style: AlertStyle.none, buttonTitle: "Скрыть")
     }
 
 }

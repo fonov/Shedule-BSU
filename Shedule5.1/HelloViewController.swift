@@ -11,29 +11,29 @@ import UIKit
 class HelloViewController: UIViewController, UIPageViewControllerDataSource {
 
     var pageViewController: UIPageViewController!
-    let nc = NSNotificationCenter.defaultCenter()
+    let nc = NotificationCenter.default
     
-    let pagearray = [["ContentViewController", ["s3.png", "•Выделение текущей пары\n•Автоматическая прокрутка расписания\n•Быстрое переключение недель", UIColor(red: 80/255, green: 208/255, blue: 125/255, alpha: 1)]], ["ContentViewController", ["s7.png", "•Гибкие настройки\n•Работа в режиме офлайн", UIColor(red: 218/255, green: 165/255, blue: 32/255, alpha: 1)]], ["ContentViewController", ["s6.png", "Добавляйте, переключайте и удаляйте группы", UIColor(red: 133/255, green: 20/255, blue: 75/255, alpha: 1)]], ["ContentViewController", ["s8.png", "Добавляйте преподавателей, переключайтесь между ними", UIColor(red: 0/255, green: 191/255, blue: 255/255, alpha: 1)]], ["ContentViewController", ["s9.png", "Уведомление о начале", UIColor(red: 233/255, green: 150/255, blue: 120/255, alpha: 1)]], ["ContentViewController", ["s10.png", "Виджет\nдля быстрого просмотра", UIColor(red: 3/255, green: 94/255, blue: 96/255, alpha: 1)]],["StartViewController", []]]
+    var pagearray = [["ContentViewController", ["s3.png", "•Выделение текущей пары\n•Автоматическая прокрутка расписания\n•Быстрое переключение недель", UIColor(red: 80/255, green: 208/255, blue: 125/255, alpha: 1)]], ["ContentViewController", ["s7.png", "•Гибкие настройки\n•Работа в режиме офлайн", UIColor(red: 218/255, green: 165/255, blue: 32/255, alpha: 1)]], ["ContentViewController", ["s8.png", "Добавляйте преподавателей, переключайтесь между ними", UIColor(red: 0/255, green: 191/255, blue: 255/255, alpha: 1)]], ["ContentViewController", ["s9.png", "Уведомление о начале", UIColor(red: 233/255, green: 150/255, blue: 120/255, alpha: 1)]], ["ContentViewController", ["s10.png", "Виджет\nдля быстрого просмотра", UIColor(red: 3/255, green: 94/255, blue: 96/255, alpha: 1)]], ["StartViewController", []]]
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.pageViewController = self.storyboard?.instantiateViewControllerWithIdentifier("PageHelloViewController") as! UIPageViewController
+        self.pageViewController = self.storyboard?.instantiateViewController(withIdentifier: "PageHelloViewController") as! UIPageViewController
         self.pageViewController.dataSource = self
         
         let vcstart = contenthello(0)
         let viewControllers = NSArray(object: vcstart)
         
-        pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .Forward, animated: true, completion: nil)
-        pageViewController.view.frame = CGRectMake(0, 0, view.frame.width, view.frame.height)
+        pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .forward, animated: true, completion: nil)
+        pageViewController.view.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
         
         
         addChildViewController(pageViewController)
         view.addSubview(pageViewController.view)
         
-        pageViewController.didMoveToParentViewController(self)
+        pageViewController.didMove(toParentViewController: self)
         
-        nc.addObserver(self, selector: #selector(HelloViewController.returnhellosetting), name: "funcreturnhellosetting", object: nil)
+        nc.addObserver(self, selector: #selector(HelloViewController.returnhellosetting), name: NSNotification.Name(rawValue: "funcreturnhellosetting"), object: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -41,21 +41,21 @@ class HelloViewController: UIViewController, UIPageViewControllerDataSource {
         // Dispose of any resources that can be recreated.
     }
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
     
-    func contenthello(index: Int) -> UIViewController{
+    func contenthello(_ index: Int) -> UIViewController{
         if((pagearray.count == 0) || (index >= pagearray.count)){
             return ContentHelloViewController()
         }
-        let vc: ContentHelloViewController = self.storyboard?.instantiateViewControllerWithIdentifier("ContentHelloViewController") as! ContentHelloViewController
-        vc.contarray = pagearray[index]
+        let vc: ContentHelloViewController = self.storyboard?.instantiateViewController(withIdentifier: "ContentHelloViewController") as! ContentHelloViewController
+        vc.contarray = pagearray[index] as NSArray!
         vc.contindex = index
         return vc
     }
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         let vc = viewController as! ContentHelloViewController
         var index = vc.contindex as Int
         
@@ -67,7 +67,7 @@ class HelloViewController: UIViewController, UIPageViewControllerDataSource {
         
     }
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         let vc = viewController as! ContentHelloViewController
         var index = vc.contindex as Int
         if index == NSNotFound || index+1 == pagearray.count{
@@ -78,16 +78,16 @@ class HelloViewController: UIViewController, UIPageViewControllerDataSource {
     }
     
     
-    func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationCount(for pageViewController: UIPageViewController) -> Int {
         return pagearray.count
     }
     
-    func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationIndex(for pageViewController: UIPageViewController) -> Int {
         return 0
     }
     
     func returnhellosetting(){
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
 
     /*

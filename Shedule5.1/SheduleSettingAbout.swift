@@ -24,42 +24,42 @@ class SheduleSettingAbout: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return arrayshedulesettingabout.count
     }
     
     
-   override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+   override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if arrayshedulesettingabout[indexPath.row][0] as! String == "cellshedulesettingaboutimg"{
             return 117}else{
             return UITableViewAutomaticDimension
     }
     }
     
-    override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         if arrayshedulesettingabout[indexPath.row][0] as! String == "cellshedulesettingaboutimg"{
             return 117}else{
             return UITableViewAutomaticDimension
         }
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if arrayshedulesettingabout[indexPath.row][0] as! String == "cellshedulesettingabout"{
-        let cell = tableView.dequeueReusableCellWithIdentifier(arrayshedulesettingabout[indexPath.row][0] as! String, forIndexPath: indexPath)
-        cell.selectionStyle = .None
-        cell.textLabel?.text = String((arrayshedulesettingabout[indexPath.row][1] as! NSArray)[0])
-        cell.detailTextLabel?.text = String((arrayshedulesettingabout[indexPath.row][1] as! NSArray)[1])
+        let cell = tableView.dequeueReusableCell(withIdentifier: arrayshedulesettingabout[indexPath.row][0] as! String, for: indexPath)
+        cell.selectionStyle = .none
+        cell.textLabel?.text = String(describing: (arrayshedulesettingabout[indexPath.row][1] as! NSArray)[0])
+        cell.detailTextLabel?.text = String(describing: (arrayshedulesettingabout[indexPath.row][1] as! NSArray)[1])
             return cell
     }
     else if arrayshedulesettingabout[indexPath.row][0] as! String == "cellshedulesettingaboutimg"{
-    let cell = tableView.dequeueReusableCellWithIdentifier(arrayshedulesettingabout[indexPath.row][0] as! String, forIndexPath: indexPath) as! SettingAboutLogo
-    cell.selectionStyle = .None
+    let cell = tableView.dequeueReusableCell(withIdentifier: arrayshedulesettingabout[indexPath.row][0] as! String, for: indexPath) as! SettingAboutLogo
+    cell.selectionStyle = .none
     cell.separatorInset = UIEdgeInsetsMake(0, 10000, 0, 0)
     return cell
     }else{
@@ -69,9 +69,9 @@ class SheduleSettingAbout: UITableViewController {
     }
 
     
-    func shedulesettingsub(text: String){
+    func shedulesettingsub(_ text: String){
         self.navigationItem.title = text
-        self.tabBarController?.tabBar.hidden = true
+        self.tabBarController?.tabBar.isHidden = true
     }
 
     /*

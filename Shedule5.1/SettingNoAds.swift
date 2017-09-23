@@ -13,33 +13,33 @@ class SettingNoAds: UITableViewCell {
     @IBOutlet weak var adsswitch: UISwitch!
     @IBOutlet weak var label: UILabel!
     
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
 
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
         label.text = "Ограничения"
-        adsswitch.enabled = false
-        nc.addObserver(self, selector: #selector(SettingNoAds.noads), name: "funcnoads", object: nil)
-        nc.addObserver(self, selector: #selector(SettingNoAds.switchenable), name: "funcswitchenable", object: nil)
+        adsswitch.isEnabled = false
+        nc.addObserver(self, selector: #selector(SettingNoAds.noads), name: NSNotification.Name(rawValue: "funcnoads"), object: nil)
+        nc.addObserver(self, selector: #selector(SettingNoAds.switchenable), name: NSNotification.Name(rawValue: "funcswitchenable"), object: nil)
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
     
-    @IBAction func adsswitch(sender: UISwitch) {
-        nc.postNotificationName("funcalertads", object: nil)
+    @IBAction func adsswitch(_ sender: UISwitch) {
+        nc.post(name: Notification.Name(rawValue: "funcalertads"), object: nil)
     }
     
     func noads(){
-        adsswitch.on = true
+        adsswitch.isOn = true
     }
     
     func switchenable(){
-        adsswitch.enabled = true
+        adsswitch.isEnabled = true
     }
 
 }

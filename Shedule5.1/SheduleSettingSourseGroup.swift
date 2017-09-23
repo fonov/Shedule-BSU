@@ -11,8 +11,8 @@ import UIKit
 class SheduleSettingSourseGroup: UITableViewController {
 
 //    @IBOutlet weak var MainID: UITextField!
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     var grouparray = [[AnyObject]]()
     var openkeyboard: Bool = false
     var showgs: Bool = false
@@ -28,11 +28,11 @@ class SheduleSettingSourseGroup: UITableViewController {
         
         shedulesettingsub("Выбор группы")
 //        MainID.becomeFirstResponder()
-        nc.addObserver(self, selector: #selector(SheduleSettingSourseGroup.fromgrouptosetting), name: "funcfromgrouptosetting", object: nil)
+        nc.addObserver(self, selector: #selector(SheduleSettingSourseGroup.fromgrouptosetting), name: NSNotification.Name(rawValue: "funcfromgrouptosetting"), object: nil)
         shedulesettinggroupinit()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
 //    shedulesettinggroupinit()
     }
 //    
@@ -55,7 +55,7 @@ class SheduleSettingSourseGroup: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         if showgs{
             return 2
         }else{
@@ -63,7 +63,7 @@ class SheduleSettingSourseGroup: UITableViewController {
         }
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         if section == 1{
         return grouparray.count
@@ -72,7 +72,7 @@ class SheduleSettingSourseGroup: UITableViewController {
         }
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0{
             return "Выбрать группу"
         }else if section == 1{
@@ -88,13 +88,13 @@ class SheduleSettingSourseGroup: UITableViewController {
         }
     }
     
-    func shedulesettingsub(text: String){
+    func shedulesettingsub(_ text: String){
         self.navigationItem.title = text
-        self.tabBarController?.tabBar.hidden = true
+        self.tabBarController?.tabBar.isHidden = true
     }
     
     func shedulesettinggroupinit(){
-        if let data = defaults.objectForKey("SheduleSettingGroupArray"){
+        if let data = defaults.object(forKey: "SheduleSettingGroupArray"){
             grouparray = data as! [[AnyObject]]
             if grouparray.count == 0{
                 showgs = false
@@ -106,20 +106,20 @@ class SheduleSettingSourseGroup: UITableViewController {
         }
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 1{
-            let cell = tableView.dequeueReusableCellWithIdentifier("shedulesettinglistgrcell", forIndexPath: indexPath) as! SettingGroupListCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "shedulesettinglistgrcell", for: indexPath) as! SettingGroupListCell
             cell.textLabel?.text = grouparray[indexPath.row][0] as? String
-            cell.selectionStyle = .None
+            cell.selectionStyle = .none
             if grouparray[indexPath.row][1] as! Bool{
-                cell.accessoryType = .Checkmark
+                cell.accessoryType = .checkmark
             }
             else{
-                cell.accessoryType = .None
+                cell.accessoryType = .none
             }
             return cell
         }else{
-        let cell = tableView.dequeueReusableCellWithIdentifier("shedulesettinggroupinput", forIndexPath: indexPath) as! SettingGroupInputCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "shedulesettinggroupinput", for: indexPath) as! SettingGroupInputCell
             if grouparray.count == 0 || openkeyboard{
             cell.groupinput.becomeFirstResponder()
             }
@@ -128,32 +128,32 @@ class SheduleSettingSourseGroup: UITableViewController {
     }
     
     func fromgrouptosetting(){
-        self.navigationController?.popViewControllerAnimated(true)
+        self.navigationController?.popViewController(animated: true)
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 1{
             shedulesettinggroupinit()
-            for (index, _) in grouparray.enumerate() {
-                grouparray[index][1] = false
+            for (index, _) in grouparray.enumerated() {
+                grouparray[index][1] = false as AnyObject
             }
-            grouparray[indexPath.row][1] = true
-            self.defaults.setObject(grouparray, forKey: "SheduleSettingGroupArray")
-            self.defaults.setObject(grouparray[indexPath.row][0], forKey: "SheduleSettingSourseGroupID")
-            self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+            grouparray[indexPath.row][1] = true as AnyObject
+            self.defaults.set(grouparray, forKey: "SheduleSettingGroupArray")
+            self.defaults.set(grouparray[indexPath.row][0], forKey: "SheduleSettingSourseGroupID")
+            self.defaults.set(true, forKey: "SheduleSettingupdate")
             self.defaults.synchronize()
-            self.navigationController?.popViewControllerAnimated(true)
+            self.navigationController?.popViewController(animated: true)
         }
         if indexPath.section == 0{
             openkeyboard = true
-            tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+            tableView.reloadRows(at: [indexPath], with: .none)
         }
     }
     
-   override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+   override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
     if indexPath.section == 1{
         
-        let dell = UITableViewRowAction(style: UITableViewRowActionStyle.Default, title: "Удалить") { action, index in
+        let dell = UITableViewRowAction(style: UITableViewRowActionStyle.default, title: "Удалить") { action, index in
 //            if self.grouparray.count > 1{
 //                if self.grouparray[indexPath.row][1] as! Bool{
 //                    print("Have CheckMark")
@@ -177,14 +177,14 @@ class SheduleSettingSourseGroup: UITableViewController {
 //            }
               self.shedulesettinggroupinit()
               if self.grouparray[indexPath.row][1] as! Bool{
-                self.defaults.removeObjectForKey("SheduleSettingSourseGroupID")
-                self.defaults.setObject(true, forKey: "SheduleSettingupdate")
+                self.defaults.removeObject(forKey: "SheduleSettingSourseGroupID")
+                self.defaults.set(true, forKey: "SheduleSettingupdate")
                 self.defaults.synchronize()
               }
-              self.grouparray.removeAtIndex(indexPath.row)
-              tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+              self.grouparray.remove(at: indexPath.row)
+              tableView.deleteRows(at: [indexPath], with: .fade)
               if self.grouparray.count == 1{
-                tableView.reloadSections(NSIndexSet(index: indexPath.section), withRowAnimation: .None)
+                tableView.reloadSections(IndexSet(integer: indexPath.section), with: .none)
               }
               self.sgsave()
               self.sgupdate()
@@ -197,7 +197,7 @@ class SheduleSettingSourseGroup: UITableViewController {
     
     
     
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if indexPath.section == 1{
             return true
         }else{
@@ -206,11 +206,11 @@ class SheduleSettingSourseGroup: UITableViewController {
     }
     
     func sgsave(){
-        self.defaults.setObject(grouparray, forKey: "SheduleSettingGroupArray")
+        self.defaults.set(grouparray, forKey: "SheduleSettingGroupArray")
         self.defaults.synchronize()
     }
     func sgupdate(){
-        if let data = defaults.objectForKey("SheduleSettingGroupArray"){
+        if let data = defaults.object(forKey: "SheduleSettingGroupArray"){
             grouparray = data as! [[AnyObject]]
             if grouparray.count == 0{
                 showgs = false

@@ -12,8 +12,8 @@ class SettingSwipeTable: UITableViewCell {
 
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var swipec: UISwitch!
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -21,30 +21,30 @@ class SettingSwipeTable: UITableViewCell {
         finit()
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
     }
-    @IBAction func swipeevent(sender: UISwitch) {
+    @IBAction func swipeevent(_ sender: UISwitch) {
         if limitation().check{
-        if defaults.objectForKey("SheduleSettingSwipeTable") == nil{
-        nc.postNotificationName("funcinstructionaboutswitch", object: nil)
+        if defaults.object(forKey: "SheduleSettingSwipeTable") == nil{
+        nc.post(name: Notification.Name(rawValue: "funcinstructionaboutswitch"), object: nil)
         }
-        defaults.setObject(sender.on, forKey: "SheduleSettingSwipeTable")
+        defaults.set(sender.isOn, forKey: "SheduleSettingSwipeTable")
         defaults.synchronize()
         }else{
-            nc.postNotificationName("funcalertinfoaboutlimits", object: nil, userInfo:["title": label.text!])
-            swipec.on = false
+            nc.post(name: Notification.Name(rawValue: "funcalertinfoaboutlimits"), object: nil, userInfo:["title": label.text!])
+            swipec.isOn = false
         }
     }
     
     func finit(){
         label.text = "Быстрое переключение недель"
-        if let flag = defaults.objectForKey("SheduleSettingSwipeTable"){
-            swipec.on = flag as! Bool
+        if let flag = defaults.object(forKey: "SheduleSettingSwipeTable"){
+            swipec.isOn = flag as! Bool
         }else{
-            swipec.on = false
+            swipec.isOn = false
         }
     }
 

@@ -9,10 +9,10 @@
 import UIKit
 
 class SettingSourseShedule: UITableViewCell {
-    var defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    var defaults: UserDefaults = UserDefaults.standard
 
     @IBOutlet weak var SheduleSettingSourseSegment: UISegmentedControl!
-    let nc = NSNotificationCenter.defaultCenter()
+    let nc = NotificationCenter.default
     var customsegment: Int = 0
     
     override func awakeFromNib() {
@@ -22,25 +22,25 @@ class SettingSourseShedule: UITableViewCell {
         ShedueSettinginitsourse()
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
     
-    @IBAction func SegmentSourseShedule(sender: UISegmentedControl) {
-        defaults.setObject(sender.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
-        defaults.setObject(true, forKey: "SheduleSettingupdate")
+    @IBAction func SegmentSourseShedule(_ sender: UISegmentedControl) {
+        defaults.set(sender.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
+        defaults.set(true, forKey: "SheduleSettingupdate")
         defaults.synchronize()
-        nc.postNotificationName("funcshedulesettingsoursereload", object: nil)
+        nc.post(name: Notification.Name(rawValue: "funcshedulesettingsoursereload"), object: nil)
     }
     
     func ShedueSettinginitsourse(){
         
-        if let data = defaults.objectForKey("SheduleSettingSourseShedule"){
+        if let data = defaults.object(forKey: "SheduleSettingSourseShedule"){
         SheduleSettingSourseSegment.selectedSegmentIndex = data as! Int
         }else{
         SheduleSettingSourseSegment.selectedSegmentIndex = 0
-        defaults.setObject(SheduleSettingSourseSegment.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
+        defaults.set(SheduleSettingSourseSegment.selectedSegmentIndex, forKey: "SheduleSettingSourseShedule")
         defaults.synchronize()
         }
         

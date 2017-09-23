@@ -10,8 +10,8 @@ import UIKit
 
 class SettingAutoScroll: UITableViewCell {
 
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var scrollswitch: UISwitch!
     
@@ -21,29 +21,29 @@ class SettingAutoScroll: UITableViewCell {
         finit()
     }
     
-    @IBAction func eventswitch(sender: UISwitch) {
+    @IBAction func eventswitch(_ sender: UISwitch) {
         if limitation().check{
-        if defaults.objectForKey("SheduleSettingAutoScroll") == nil{
-        nc.postNotificationName("funcinstructionaboutautoscroll", object: nil)
+        if defaults.object(forKey: "SheduleSettingAutoScroll") == nil{
+        nc.post(name: Notification.Name(rawValue: "funcinstructionaboutautoscroll"), object: nil)
         }
-        defaults.setObject(sender.on, forKey: "SheduleSettingAutoScroll")
+        defaults.set(sender.isOn, forKey: "SheduleSettingAutoScroll")
         defaults.synchronize()
         }else{
-            nc.postNotificationName("funcalertinfoaboutlimits", object: nil, userInfo:["title": label.text!])
-            scrollswitch.on = false
+            nc.post(name: Notification.Name(rawValue: "funcalertinfoaboutlimits"), object: nil, userInfo:["title": label.text!])
+            scrollswitch.isOn = false
         }
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
     
     func finit(){
         label.text = "Автоматическая прокрутка расписания"
-        if let flag = defaults.objectForKey("SheduleSettingAutoScroll"){
-            scrollswitch.on = flag as! Bool
+        if let flag = defaults.object(forKey: "SheduleSettingAutoScroll"){
+            scrollswitch.isOn = flag as! Bool
         }else{
-            scrollswitch.on = false
+            scrollswitch.isOn = false
         }
     }
 

@@ -8,23 +8,23 @@
 
 import Foundation
 
-public class limitation{
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+open class limitation{
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     var check: Bool{
-        if defaults.objectForKey("ads") == nil{
+        if defaults.object(forKey: "ads") == nil{
             return false
         }else{
             return true
         }
     }
     var offlimitation: Bool{
-        defaults.setObject(true, forKey: "ads")
+        defaults.set(true, forKey: "ads")
         defaults.synchronize()
         return true
     }
     var onlimitation: Bool{
-        defaults.removeObjectForKey("ads")
+        defaults.removeObject(forKey: "ads")
         return true
     }
 }

@@ -12,8 +12,8 @@ class ContentHelloViewController: UIViewController {
     
     var contindex: Int!
     var contarray: NSArray!
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     
     @IBOutlet weak var labelview: UIView!
     @IBOutlet weak var label: UILabel!
@@ -25,27 +25,27 @@ class ContentHelloViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         if contarray[0] as! String == "ContentViewController"{
-            img.image = UIImage(named: String((contarray[1] as! NSArray)[0]))
-            label.text = String((contarray[1] as! NSArray)[1])
+            img.image = UIImage(named: String(describing: (contarray[1] as! NSArray)[0]))
+            label.text = String(describing: (contarray[1] as! NSArray)[1])
             imgview.backgroundColor = (contarray[1] as! NSArray)[2] as? UIColor
-            startview.hidden = true
+            startview.isHidden = true
         }
         if contarray[0] as! String == "StartViewController"{
-            startview.hidden = false
+            startview.isHidden = false
         }
         let topBorder: CALayer = CALayer()
-        topBorder.frame = CGRectMake(0.0, 0.0, view.frame.size.width, 2.0)
-        topBorder.backgroundColor = UIColor.lightGrayColor().CGColor
+        topBorder.frame = CGRect(x: 0.0, y: 0.0, width: view.frame.size.width, height: 2.0)
+        topBorder.backgroundColor = UIColor.lightGray.cgColor
         labelview.layer.addSublayer(topBorder)
         
         label.layer.shadowOffset = CGSize(width: 10, height: 20)
         label.layer.shadowOpacity = 0.3
         label.layer.shadowRadius = 6
         
-        if let _ = defaults.objectForKey("hidehellovc"){
-        bttext.setTitle("Скрыть", forState: .Normal)
+        if let _ = defaults.object(forKey: "hidehellovc"){
+        bttext.setTitle("Скрыть", for: UIControlState())
         }else{
-        bttext.setTitle("Начать пользоваться", forState: .Normal)
+        bttext.setTitle("Начать пользоваться", for: UIControlState())
         }
     }
 
@@ -54,15 +54,15 @@ class ContentHelloViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func startshedule(sender: AnyObject) {
-        if let _ = defaults.objectForKey("hidehellovc"){
-            nc.postNotificationName("funcreturnhellosetting", object: nil)
+    @IBAction func startshedule(_ sender: AnyObject) {
+        if let _ = defaults.object(forKey: "hidehellovc"){
+            nc.post(name: Notification.Name(rawValue: "funcreturnhellosetting"), object: nil)
         }else{
-            defaults.setObject(true, forKey: "hidehellovc")
+            defaults.set(true, forKey: "hidehellovc")
             defaults.synchronize()
-            let mainStoryboard = UIStoryboard(name: "Main", bundle: NSBundle.mainBundle())
-            let vc = mainStoryboard.instantiateViewControllerWithIdentifier("MainShedule") as! UITabBarController
-            UIApplication.sharedApplication().keyWindow?.rootViewController = vc;
+            let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+            let vc = mainStoryboard.instantiateViewController(withIdentifier: "MainShedule") as! UITabBarController
+            UIApplication.shared.keyWindow?.rootViewController = vc;
         }
     }
 

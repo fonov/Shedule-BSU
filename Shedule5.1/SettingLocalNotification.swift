@@ -12,33 +12,33 @@ class SettingLocalNotification: UITableViewCell {
 
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var sswipe: UISwitch!
-    let defaults: NSUserDefaults = NSUserDefaults(suiteName: "group.com.shedule")!
-    let nc = NSNotificationCenter.defaultCenter()
+    let defaults: UserDefaults = UserDefaults(suiteName: "group.com.shedule")!
+    let nc = NotificationCenter.default
     
     override func awakeFromNib() {
         super.awakeFromNib()
 //        finit()
     }
     
-    @IBAction func swipeaction(sender: UISwitch) {
+    @IBAction func swipeaction(_ sender: UISwitch) {
         if limitation().check{
-        if defaults.objectForKey("SheduleSettingLocalNotification") != nil{
-        if let settings = UIApplication.sharedApplication().currentUserNotificationSettings()
+        if defaults.object(forKey: "SheduleSettingLocalNotification") != nil{
+        if let settings = UIApplication.shared.currentUserNotificationSettings
         {
-            if settings.types.contains([.Alert, .Badge])
+            if settings.types.contains([.alert, .badge])
             {
-                defaults.setObject(sender.on, forKey: "SheduleSettingLocalNotification")
+                defaults.set(sender.isOn, forKey: "SheduleSettingLocalNotification")
                 defaults.synchronize()
             }
             else
             {
-                if sender.on == true{
-                defaults.setObject(false, forKey: "SheduleSettingLocalNotification")
+                if sender.isOn == true{
+                defaults.set(false, forKey: "SheduleSettingLocalNotification")
                 defaults.synchronize()
-                nc.postNotificationName("funcinstructionaboutnotLocalNotification", object: nil)
-                sswipe.on = false
+                nc.post(name: Notification.Name(rawValue: "funcinstructionaboutnotLocalNotification"), object: nil)
+                sswipe.isOn = false
                 }else{
-                    defaults.setObject(sender.on, forKey: "SheduleSettingLocalNotification")
+                    defaults.set(sender.isOn, forKey: "SheduleSettingLocalNotification")
                     defaults.synchronize()
                 }
                 
@@ -46,20 +46,20 @@ class SettingLocalNotification: UITableViewCell {
             }
         }
         }
-        if defaults.objectForKey("SheduleSettingLocalNotification") == nil{
-            nc.postNotificationName("funcinstructionaboutLocalNotification", object: nil)
-            let settings = UIUserNotificationSettings(forTypes: [.Alert, .Badge], categories: nil)
-            UIApplication.sharedApplication().registerUserNotificationSettings(settings)
-            defaults.setObject(sender.on, forKey: "SheduleSettingLocalNotification")
+        if defaults.object(forKey: "SheduleSettingLocalNotification") == nil{
+            nc.post(name: Notification.Name(rawValue: "funcinstructionaboutLocalNotification"), object: nil)
+            let settings = UIUserNotificationSettings(types: [.alert, .badge], categories: nil)
+            UIApplication.shared.registerUserNotificationSettings(settings)
+            defaults.set(sender.isOn, forKey: "SheduleSettingLocalNotification")
             defaults.synchronize()
         }
     }else{
-    nc.postNotificationName("funcalertinfoaboutlimits", object: nil, userInfo:["title": label.text!])
-    sswipe.on = false
+    nc.post(name: Notification.Name(rawValue: "funcalertinfoaboutlimits"), object: nil, userInfo:["title": label.text!])
+    sswipe.isOn = false
     }
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
     
